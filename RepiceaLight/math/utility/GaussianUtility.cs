@@ -1,36 +1,44 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-
+﻿/*
+ * This file is part of the REpiceaLight project.
+ *
+ * Copyright (C) 2025 His Majesty the King in right of Canada
+ * Author: Mathieu Fortin, Canadian Forest Service
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 3 of the License, or (at your option) any later version.
+ *
+ * This library is distributed with the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * License for more details.
+ *
+ * Please see the license at http://www.gnu.org/copyleft/lesser.html.
+ */
 namespace REpiceaLight.math.utility
 {
-    /**
- * The Gaussian class implements common static methods that are related to the density or
- * the cumulative probability of the Gaussian distribution.
- * @author Mathieu Fortin - July 2012
- */
+    /// <summary>
+    /// The Gaussian class implements common static methods that are related to the density or
+    /// the cumulative probability of the Gaussian distribution.
+    /// </summary>
     public class GaussianUtility
     {
 
         private static readonly double[] x = { 0.04691008, 0.23076534, 0.5, 0.76923466, 0.95308992 };
         private static readonly double[] w = { 0.018854042, 0.038088059, 0.0452707394, 0.038088059, 0.018854042 };
 
-        /**
-         * This method returns the cumulative probability of a bivariate standard normal 
-         * distribution for quantiles x1 and x2. The algorithm was translated from West's code.
-         * @param x1 the first quantile
-         * @param x2 the second quantile
-         * @param rho the correlation parameter
-         * @return the probability (a double)
-         * @see <a href=http://www.wilmott.com/pdfs/090721_west.pdf> West, G. Better approximations to cumulative normal functions.
-         * WILMOTT magazine. 70-76. </a> 
-         */
+        /// <summary>
+        /// Provide the cumulative probability of a bivariate standard normal distribution for quantiles x1 and x2.<br></br>
+        /// The algorithm was translated from <a href="http://www.wilmott.com/pdfs/090721_west.pdf"> West, G. Better approximations to cumulative normal functions.  WILMOTT magazine. 70-76. </a> 
+        /// </summary>
+        /// <param name="x1">the first quantile</param>
+        /// <param name="x2">the second quantile</param>
+        /// <param name="rho">the correlation parameter</param>
+        /// <returns>the joint probability</returns>
         public static double GetBivariateCumulativeProbability(double x1, double x2, double rho)
         {
-
             double h1, h2;
             double lh, h12;
             double h3, h5, h6, h7, h8;
@@ -96,18 +104,17 @@ namespace REpiceaLight.math.utility
         }
 
 
-        /**
-         * This method returns the cumulative probability or complementary probability of a bivariate standard normal 
-         * distribution for quantiles x1 and x2. The algorithm was translated from West's code.
-         * @param x1 the first quantile
-         * @param x2 the second quantile
-         * @param complementary1 a boolean true to obtain the complementary probability with respect to quantile x1 or false for the cumulative probability
-         * @param complementary2 a boolean true to obtain the complementary probability with respect to quantile x2 or false for the cumulative probability
-         * @param rho the correlation parameter
-         * @return the probability (a double)
-         * @see <a href=http://www.wilmott.com/pdfs/090721_west.pdf> West, G. Better approximations to cumulative normal functions.
-         * WILMOTT magazine. 70-76. </a> 
-         */
+        /// <summary>
+        /// Provide the cumulative or complementary probability of a bivariate standard normal distribution for quantiles x1 and x2.<br></br>
+        /// The algorithm was translated from <a href="http://www.wilmott.com/pdfs/090721_west.pdf"> West, G. Better approximations to cumulative normal functions.  WILMOTT magazine. 70-76. </a> 
+        /// </summary>
+        /// <param name="x1">the first quantile</param>
+        /// <param name="x2">the second quantile</param>
+        /// <param name="complementary1">a boolean true to obtain the complementary probability with respect to quantile x1 or false for the cumulative probability</param>
+        /// <param name="complementary2">a boolean true to obtain the complementary probability with respect to quantile x2 or false for the cumulative probability</param>
+        /// <param name="rho">the correlation parameter</param>
+        /// <returns>the joint probability</returns>
+
         public static double GetBivariateCumulativeProbability(double x1, double x2, bool complementary1, bool complementary2, double rho)
         {
             if (complementary1)
@@ -122,15 +129,12 @@ namespace REpiceaLight.math.utility
 
         }
 
-
-        /**
-         * This method returns the cumulative probability probability of a standard normal 
-         * distribution for quantile x. The algorithm was translated from West's code.
-         * @param x the quantile
-         * @return the probability (a double)
-         * @see <a href=http://www.wilmott.com/pdfs/090721_west.pdf> West, G. Better approximations to cumulative normal functions.
-         * WILMOTT magazine. 70-76. </a> 
-         */
+        /// <summary>
+        /// Provide the cumulative probability of a standard normal distribution for quantile x.<br></br>
+        /// The algorithm was translated from <a href="http://www.wilmott.com/pdfs/090721_west.pdf"> West, G. Better approximations to cumulative normal functions.  WILMOTT magazine. 70-76. </a> 
+        /// </summary>
+        /// <param name="x">the quantile</param>
+        /// <returns>the probability</returns>
         public static double GetCumulativeProbability(double x)
         {
             double cumnorm = Double.NaN;
@@ -178,21 +182,18 @@ namespace REpiceaLight.math.utility
         }
 
 
-        /**
-         * This method returns the cumulative probability or the complementary probability of a standard normal 
-         * distribution for quantile x. The algorithm was translated from West's code.
-         * @param x the quantile
-         * @param complementary a boolean true to obtain the complementary probability or false to get the cumulative probability
-         * @return the probability (a double)
-         * @see <a href=http://www.wilmott.com/pdfs/090721_west.pdf> West, G. Better approximations to cumulative normal functions.
-         * WILMOTT magazine. 70-76. </a> 
-         */
+        /// <summary>
+        /// Provide the cumulative probability or the complementary probability of a standard normal distribution for quantile x.<br></br>
+        /// The algorithm was translated from <a href="http://www.wilmott.com/pdfs/090721_west.pdf"> West, G. Better approximations to cumulative normal functions.  WILMOTT magazine. 70-76. </a> 
+        /// </summary>
+        /// <param name="x">the quantile</param>
+        /// <param name="complementary">a boolean true to obtain the complementary probability or false to get the cumulative probability</param>
+        /// <returns>the probability</returns>
         public static double GetCumulativeProbability(double x, bool complementary)
         {
-            if (complementary)
-                return 1d - GetCumulativeProbability(x);
-            else
-                return GetCumulativeProbability(x);
+            return complementary ?
+                1d - GetCumulativeProbability(x) :
+                    GetCumulativeProbability(x);
         }
 
         private static readonly double[] quantArrayA = new double[] { -3.969683028665376E+01, 2.209460984245205E+02, -2.759285104469687E+02, 1.383577518672690E+02, -3.066479806614716E+01, 2.506628277459239 };
@@ -200,11 +201,11 @@ namespace REpiceaLight.math.utility
         private static readonly double[] quantArrayC = new double[] { -7.784894002430293E-03, -3.223964580411365E-01, -2.400758277161838, -2.549732539343734, 4.374664141464968, 2.938163982698783 };
         private static readonly double[] quantArrayD = new double[] { 7.784695709041462E-03, 3.224671290700398E-01, 2.445134137142996, 3.754408661907416 };
 
-        /**
-         * This method returns the quantiles of the distribution.
-         * @param cdfValue the cumulative density
-         * @return a quantile
-         */
+        /// <summary>
+        /// Provide the quantile of the distribution
+        /// </summary>
+        /// <param name="cdfValue">the cumulative probability</param>
+        /// <returns>the quantile</returns>
         public static double GetQuantile(double cdfValue)
         {
 
@@ -240,15 +241,13 @@ namespace REpiceaLight.math.utility
             return IncreasePrecision(x, cdfValue);
         }
 
-
-        /**
-         * Compute the probability density for a value of a normal distribution with mean mu and
-         * variance sigma2.
-         * @param y the value
-         * @param mu the mean of the distribution
-         * @param sigma2 the variance of the distribution. Must be greater than 0.
-         * @return a probability density
-         */
+        /// <summary>
+        /// Compute the probability density for a value of a normal distribution with mean mu and variance sigma2.
+        /// </summary>
+        /// <param name="y">the value</param>
+        /// <param name="mu">the mean of the distribution</param>
+        /// <param name="sigma2"> the variance of the distribution. Must be greater than 0.</param>
+        /// <returns>a probability density</returns>
         public static double GetProbabilityDensity(double y, double mu, double sigma2)
         {
             if (sigma2 <= 0)
@@ -258,11 +257,11 @@ namespace REpiceaLight.math.utility
                     Math.Exp(-0.5 * diff * diff / sigma2);
         }
 
-        /**
-         * Compute the probability density for a quantile of the standard normal distribution. 
-         * @param y the quantile
-         * @return its probability density
-         */
+        /// <summary>
+        /// Compute the probability density for a quantile of the standard normal distribution. 
+        /// </summary>
+        /// <param name="y">the quantile</param>
+        /// <returns>its probability density</returns>
         public static double GetProbabilityDensity(double y)
         {
             return GetProbabilityDensity(y, 0, 1);

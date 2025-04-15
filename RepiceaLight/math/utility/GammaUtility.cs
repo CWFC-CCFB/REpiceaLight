@@ -1,11 +1,28 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿/*
+ * This file is part of the REpiceaLight project.
+ *
+ * Copyright (C) 2025 His Majesty the King in right of Canada
+ * Author: Mathieu Fortin, Canadian Forest Service
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 3 of the License, or (at your option) any later version.
+ *
+ * This library is distributed with the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * License for more details.
+ *
+ * Please see the license at http://www.gnu.org/copyleft/lesser.html.
+ */
 namespace REpiceaLight.math.utility
 {
+
+    /// <summary>
+    /// A class that provides static methods related to the Gamma function.
+    /// </summary>
     public sealed class GammaUtility
     {
 
@@ -13,12 +30,13 @@ namespace REpiceaLight.math.utility
             -6348.160217641458813289, 1301.608286058321874105, -108.1767053514369634679, 2.605696505611755827729, -0.7423452510201416151527e-2,
             0.5384136432509564062961e-7, -0.4023533141268236372067e-8};     // higher precision with these coefficients
 
-        /**
-         * Compute the result of the Gamma function. <p>
-         * The implementation is the Lanczos approximation. 
-         * @param z the argument
-         * @return a double the value of the function
-         */
+        /// <summary>
+        /// Compute the result of the Gamma function.<br></br>
+        /// The implementation is the Lanczos approximation.
+        /// </summary>
+        /// <param name="z">the argument</param>
+        /// <returns>the value of the function (double)</returns>
+        /// <exception cref="ArgumentException"></exception>
         public static double Gamma(double z)
         {
             if (z <= 0d)
@@ -44,12 +62,12 @@ namespace REpiceaLight.math.utility
             return result;
         }
 
-        /**
-         * Calculate the logarithm of the Gamma function.
-         * @param z the argument
-         * @return a double the logarithm of the Gamma function
-         */
-        public static double logGamma(double z)
+        /// <summary>
+        /// Calculate the logarithm of the Gamma function.
+        /// </summary>
+        /// <param name="z">the argument</param>
+        /// <returns>a double the logarithm of the Gamma function</returns>
+        public static double LogGamma(double z)
         {
             return Math.Log(Gamma(z));
         }
@@ -59,13 +77,13 @@ namespace REpiceaLight.math.utility
         private static readonly double SQRT_TWICE_PI = Math.Sqrt(2 * Math.PI);
         private static readonly double C = SQRT_TWICE_PI / Math.Exp(1) - Gamma(K);
 
-        /**
-         * Compute the approximation of the inverse Gamma function. <p>
-         * This approximation was designed by David W. Cantrell. 
-         * @param z a double equal or greater than 1.
-         * @return a double
-         * @see <a href="https://web.archive.org/web/20171104030158/http://mathforum.org/kb/message.jspa?messageID=342551&tstart=0">Link to David W. Cantrell post</a>
-         */
+        /// <summary>
+        /// Compute the approximation of the inverse Gamma function. <br></br>
+        /// This approximation was designed by David W.Cantrell.
+        /// </summary>
+        /// <param name="z">a double equal to or greater than 1</param>
+        /// <returns>a double</returns>
+        /// <exception cref="ArgumentException"></exception>
         public static double InverseGamma(double z)
         {
             if (z < 1)
@@ -75,12 +93,15 @@ namespace REpiceaLight.math.utility
             return l_x / w_x + .5;
         }
 
-        /**
-         * This method implements the Lambert W function.
-         * Code taken from http://keithbriggs.info/software.html  
-         * @param z
-         * @return
-         */
+
+        /// <summary>
+        /// Implements the Lambert W function.<br></br>
+        /// Code taken from <a href="http://keithbriggs.info/software.html">http://keithbriggs.info/software.html</a>  
+        /// </summary>
+        /// <param name="z"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentException"></exception>
+        /// <exception cref="InvalidOperationException"></exception>
         private static double LambertW(double z)
         {
             double eps = 4e-16;
@@ -136,33 +157,33 @@ namespace REpiceaLight.math.utility
             throw new InvalidOperationException("Unable to reach convergence for z = " + z);
         }
 
-        /**
-         * Compute the first derivative of the gamma function. <p>
-         * The calculation is based on the digamma function.
-         * @see<a href=https://en.wikipedia.org/wiki/Digamma_function> Digamma function </a>
-         * @param d the argument of the function
-         * @return the first derivative (a double)
-         */
+
+
+        /// <summary>
+        /// Compute the first derivative of the gamma function. <br></br>
+        /// The calculation is based on the digamma function.<br></br> 
+        /// See <a href="https://en.wikipedia.org/wiki/Digamma_function">Digamma function</a>
+        /// </summary>
+        /// <param name="d">the argument of the function</param>
+        /// <returns>the first derivative (a double)</returns>
         public static double GammaFirstDerivative(double d)
         {
             return Gamma(d) * Digamma(d);
         }
 
 
-        /**
-         * Compute an approximation of the digamma function. <br>
-         * <br>
-         * The approximation is calculated as ln(d) - 1/2d.
-         * @see<a href=https://en.wikipedia.org/wiki/Digamma_function> Digamma function </a>
-         * @param d a strictly positive double 
-         * @return a double
-         */
+        /// <summary>
+        /// Compute an approximation of the digamma function. <br></br>
+        /// The approximation is calculated as ln(d) - 1/2d. <br></br>
+        /// See <a href="https://en.wikipedia.org/wiki/Digamma_function">Digamma function</a>
+        /// </summary>
+        /// <param name="d">a strictly positive double </param>
+        /// <returns>a double</returns>
         public static double Digamma(double d)
         {
             if (d <= 0d)
-            {
                 throw new ArgumentException("The digamma function is not defined for values smaller than or equal to 0!");
-            }
+
             double d_star = d;
             double corrTerm = 0;
             while (d_star < 6)
@@ -185,14 +206,12 @@ namespace REpiceaLight.math.utility
         }
 
 
-        /**
-         * Compute an approximation of the digamma function. <br>
-         * <br>
-         * The approximation is calculated as ln(d) - 1/2d.
-         * @see<a href=https://en.wikipedia.org/wiki/Digamma_function> Digamma function </a>
-         * @param d a strictly positive double 
-         * @return a double
-         */
+        /// <summary>
+        /// Compute an approximation of the trigamma function. <br></br>
+        /// See <a href = "https://en.wikipedia.org/wiki/Trigamma_function">Trigamma function</a>
+        /// </summary>
+        /// <param name="d">a strictly positive double</param>
+        /// <returns>a double</returns>
         public static double Trigamma(double d)
         {
             if (d <= 0d)
