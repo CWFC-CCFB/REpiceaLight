@@ -1,7 +1,31 @@
-﻿using System.Text;
+﻿/*
+ * This file is part of the REpiceaLight project.
+ *
+ * Copyright (C) 2025 His Majesty the King in right of Canada
+ * Author: Mathieu Fortin, Canadian Forest Service
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 3 of the License, or (at your option) any later version.
+ *
+ * This library is distributed with the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * License for more details.
+ *
+ * Please see the license at http://www.gnu.org/copyleft/lesser.html.
+ */
+using System.Text;
 
 namespace REpiceaLight.math
 {
+    /// <summary>
+    /// An abstract class for matrix.<br></br>
+    /// P is left as a parameter for an eventual implementation of complex matrices.
+    /// </summary>
+    /// <typeparam name="P"></typeparam>
     public abstract class AbstractMatrix<P> : ICloneable where P : AbstractMatrix<P>
     {
 
@@ -32,42 +56,32 @@ namespace REpiceaLight.math
         /// <returns>the results in a Matrix instance</returns>
         public abstract P ExpMatrix();
 
-
-        /**
-         * This method returns a submatrix of this matrix. 
-         * @param startRow the index of the first row (included)
-         * @param endRow the index of the last row (included)
-         * @param startColumn the index of the first column (included)
-         * @param endColumn the index of the last column (included)
-         * @return the submatrix in a Matrix instance
-         */
+        /// <summary>
+        /// Provide a submatrix from this AbstractMatrix instance.
+        /// </summary>
+        /// <param name="startRow">the index of the first row (included)</param>
+        /// <param name="endRow">the index of the last row (included)</param>
+        /// <param name="startColumn">the index of the first column (included)</param>
+        /// <param name="endColumn">the index of the last column (included)</param>
+        /// <returns>the submatrix in a Matrix instance</returns>
         public abstract P GetSubMatrix(int startRow, int endRow, int startColumn, int endColumn);
 
-        /**
-         * This method returns a sub matrix whose elements correspond to the indices listed in 
-         * the row index list and the column index list.
-         * 
-         * @param rowIndex a List of integers (if null all the rows are selected)
-         * @param columnIndex a List of integers (if null all the columns are selected)
-         * @param sortIndices a boolean true to enable the sorting of the indices
-         * @return a Matrix instance
-         */
+        /// <summary>
+        /// Provide a submatrix from this AbstractMatrix instance.
+        /// </summary>
+        /// <param name="rowIndex">a List of integers (if null all the rows are selected)</param>
+        /// <param name="columnIndex">a List of integers (if null all the columns are selected)</param>
+        /// <param name="sortIndices">a boolean true to enable the sorting of the indices</param>
+        /// <returns>the submatrix in a Matrix instance</returns>
         public abstract P GetSubMatrix(List<int> rowIndex, List<int> columnIndex, bool sortIndices);
 
 
-        /**
-         * This method returns a sub matrix whose elements correspond to the indices listed in 
-         * the row index list and the column index list. <p>
-         *
-         * This method sorts the indices before constructing the sub matrices. So if rowIndex = {1,3,2},
-         * the rows of resulting submatrix will correspond to rows 1, 2, 3 in this order. It is a proxy for 
-         * getSubMatrix(rowIndex, columnIndex, true). 
-         *  
-         * @see Matrix#getSubMatrix(List, List, boolean)
-         * @param rowIndex a List of integers (if null all the rows are selected)
-         * @param columnIndex a List of integers (if null all the columns are selected)
-         * @return a Matrix instance
-         */
+        /// <summary>
+        /// Provide a submatrix from this AbstractMatrix instance.
+        /// </summary>
+        /// <param name="rowIndex">a List of integers (if null all the rows are selected)</param>
+        /// <param name="columnIndex">a List of integers (if null all the columns are selected)</param>
+        /// <returns>the submatrix in a Matrix instance</returns>
         public abstract P GetSubMatrix(List<int> rowIndex, List<int> columnIndex);
 
 
@@ -85,29 +99,29 @@ namespace REpiceaLight.math
         /// <returns>a Matrix instance</returns>
         public abstract P ElementWiseMultiply(P m);
 
-        /**
-         * This method checks if this is a column vector
-         * @return a boolean that is true if this is a column vector
-         */
+        /// <summary>
+        /// Check if this AbstractMatrix instance is a column vector
+        /// </summary>
+        /// <returns>a boolean that is true if this is a column vector</returns>
         public bool IsColumnVector() { return m_iCols == 1; }
 
-        /**
-         * This method checks if this is a row vector
-         * @return a boolean that is true if this is a row vector
-         */
+        /// <summary>
+        /// Check if this AbstractMatrix instance is a row vector
+        /// </summary>
+        /// <returns>a boolean that is true if this is a row vector</returns>
         public bool IsRowVector() { return m_iRows == 1; }
 
-        /**
-         * This method checks if this is a square matrix
-         * @return true if the matrix is square or false otherwise
-         */
+        /// <summary>
+        /// Check if this AbstractMatrix instance is square
+        /// </summary>
+        /// <returns>a boolean that is true if this is a square matrix</returns>
         public bool IsSquare() { return m_iRows == m_iCols; }
 
-        /**
-         * This method checks whether or not this and m have the same dimensions
-         * @param m an AbstractMatrix-derived instance
-         * @return boolean
-         */
+        /// <summary>
+        /// Check whether this AbstractMatrix instance and m have the same dimensions
+        /// </summary>
+        /// <param name="m">an AbstractMatrix instance</param>
+        /// <returns>a boolean</returns>
         public bool IsTheSameDimension(P m)
         {
             bool output = false;
@@ -135,21 +149,18 @@ namespace REpiceaLight.math
         /// <returns>the result in a new Matrix instance</returns>
         public abstract P ScalarMultiply(double d);
 
-
-        /**
-         * Replace some elements of the matrix by those that are contained in matrix m.
-         * @param m a Matrix instance 
-         * @param i the row index of the first element to be changed
-         * @param j the column index of the first element to be changed
-         */
+        /// <summary>
+        /// Replace some elements of the matrix by those that are contained in matrix m.
+        /// </summary>
+        /// <param name="m">a Matrix instance </param>
+        /// <param name="i">the row index of the first element to be changed</param>
+        /// <param name="j">the column index of the first element to be changed</param>
         public abstract void SetSubMatrix(P m, int i, int j);
 
-
-        /**
-         * Compute the logarithm of the elements of this matrix 
-         * @return the results in a Matrix instance
-         * @throws UnsupportedOperationException if one element of the matrix is smaller than or equal to 0
-         */
+        /// <summary>
+        /// Compute the logarithm of the elements of this matrix. 
+        /// </summary>
+        /// <returns>the results in a Matrix instance</returns>
         public abstract P LogMatrix();
 
         /// <summary>
@@ -166,11 +177,10 @@ namespace REpiceaLight.math
         /// <returns>the transposed matrix in a new Matrix instance</returns>
         public abstract P Transpose();
 
-
-
-        /**
-         * Returns a representation of the matrix content.
-         */
+        /// <summary>
+        /// Provide a representation of the matrix content. 
+        /// </summary>
+        /// <returns>a string</returns>
         public sealed override string ToString()
         {
             StringBuilder outputString = new StringBuilder();
@@ -202,11 +212,11 @@ namespace REpiceaLight.math
             return outputString.ToString();
         }
 
-        /**
-         * Convert a particular row of the matrix into a string.
-         * @param rowIndex the index of the row to be converted
-         * @return a String instance
-         */
+        /// <summary>
+        /// Convert a particular row of the matrix into a string.
+        /// </summary>
+        /// <param name="rowIndex">the index of the row to be converted</param>
+        /// <returns>a string</returns>
         protected abstract string ConvertArrayToString(int rowIndex);
 
         /// <summary>
