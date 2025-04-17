@@ -1,40 +1,51 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-
+﻿/*
+ * This file is part of the REpiceaLight project.
+ *
+ * Copyright (C) 2025 His Majesty the King in right of Canada
+ * Author: Mathieu Fortin, Canadian Forest Service
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 3 of the License, or (at your option) any later version.
+ *
+ * This library is distributed with the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * License for more details.
+ *
+ * Please see the license at http://www.gnu.org/copyleft/lesser.html.
+ */
 namespace REpiceaLight.math
 {
+    /// <summary>
+    /// An extension of the Matrix class specifically for symmetric matrices.
+    /// </summary>
     public class SymmetricMatrix : Matrix
     {
 
-
-        public SymmetricMatrix(int size) : base(size, size, true)
-        {
-        }
+        /// <summary>
+        /// Constructor.<br></br>
+        /// The matrix is instantiated with all its elements set to 0.
+        /// </summary>
+        /// <param name="size">the dimension of the square matrix</param>
+        public SymmetricMatrix(int size) : base(size, size, true) {}
 
         protected override double[][] ContructInternalArray(int iRows, int iCols)
         {
             double[][] mainArray = new double[iRows][];
             for (int i = 0; i < mainArray.Length; i++)
-            {
                 mainArray[i] = new double[iCols - i];
-            }
             return mainArray;
         }
 
         public override void SetValueAt(int i, int j, double value)
         {
             if (j >= i)
-            {
                 m_afData[i][j - i] = value;
-            }
             else
-            {
                 m_afData[j][i - j] = value;
-            }
         }
 
         public override double GetValueAt(int i, int j)
@@ -53,30 +64,20 @@ namespace REpiceaLight.math
             {
                 SymmetricMatrix oMat = new SymmetricMatrix(m_iRows);
                 for (int i = 0; i < this.m_iRows; i++)
-                {
                     for (int j = i; j < this.m_iCols; j++)
-                    {
                         oMat.SetValueAt(i, j, GetValueAt(i, j) / m.GetValueAt(i, j));
-                    }
-                }
                 return oMat;
             }
             else
-            {
                 return base.ElementWiseDivide(m);
-            }
         }
 
         public override bool AnyElementNaN()
         {
             for (int i = 0; i < this.m_iRows; i++)
-            {
                 for (int j = i; j < this.m_iCols; j++)
-                {
                     if (Double.IsNaN(this.GetValueAt(i, j)))
                         return true;
-                }
-            }
             return false;
         }
 
@@ -86,15 +87,9 @@ namespace REpiceaLight.math
             {
                 SymmetricMatrix oMat = new SymmetricMatrix(m_iRows);
                 for (int i = 0; i < this.m_iRows; i++)
-                {
                     for (int j = i; j < this.m_iCols; j++)
-                    {
                         if (GetValueAt(i, j) != 0d && m.GetValueAt(i, j) != 0d)
-                        {
                             oMat.SetValueAt(i, j, GetValueAt(i, j) * m.GetValueAt(i, j));
-                        }
-                    }
-                }
                 return oMat;
             }
             else
@@ -105,12 +100,8 @@ namespace REpiceaLight.math
         {
             SymmetricMatrix matrix = new(m_iRows);
             for (int i = 0; i < matrix.m_iRows; i++)
-            {
                 for (int j = i; j < matrix.m_iCols; j++)
-                {
                     matrix.SetValueAt(i, j, Math.Exp(GetValueAt(i, j)));
-                }
-            }
             return matrix;
         }
 
@@ -138,24 +129,17 @@ namespace REpiceaLight.math
                 throw new InvalidOperationException("Matrix.LogMatrix() : At least one argument value for the log function is smaller or equal to 0");
         }
 
-
-
-
         public override Matrix Multiply(Matrix m)
         {
             if (m_iCols != m.m_iRows)
-            {
                 throw new InvalidOperationException("The matrix m cannot multiply the current matrix for the number of rows is incompatible!");
-            }
             else
             {
                 if (m.Equals(this))
                 {   // multiplied by itself yields a SymmetricMatrix instance
                     SymmetricMatrix mat = new(m_iRows);
                     for (int i_this = 0; i_this < m_iRows; i_this++)
-                    {
                         for (int j_m = i_this; j_m < m.m_iCols; j_m++)
-                        {
                             for (int j_this = 0; j_this < m_iCols; j_this++)
                             {
                                 int i_m = j_this;
@@ -165,8 +149,6 @@ namespace REpiceaLight.math
                                     mat.SetValueAt(i_this, j_m, newValue);
                                 }
                             }
-                        }
-                    }
                     return mat;
                 }
                 else
@@ -294,11 +276,10 @@ namespace REpiceaLight.math
                 return base.GetKroneckerProduct(m);
         }
 
-        /**
-         * Create a Matrix that corresponds to the Isserlis theorem given that matrix this is
-         * a variance-covariance matrix.
-         * @return a SymmetricMatrix instance
-         */
+        /// <summary>
+        /// Create a Matrix that corresponds to the Isserlis theorem given that matrix this is a variance-covariance matrix.
+        /// </summary>
+        /// <returns>a SymmetricMatrix instance</returns>
         public SymmetricMatrix GetIsserlisMatrix()
         {
             SymmetricMatrix output = new(m_iRows * m_iRows);
@@ -369,12 +350,11 @@ namespace REpiceaLight.math
             return matrix;
         }
 
-
-        /**
-         * Check if the matrix is positive definite. The check is based on the Cholesky factorization. If the factorization can
-         * be computed the method returns true.
-         * @return true if it is or false otherwise
-         */
+        /// <summary>
+        /// Check if the matrix is positive definite. <br></br>
+        /// The check is based on the Cholesky factorization. If the factorization can be computed the method returns true.
+        /// </summary>
+        /// <returns>a boolean, true if the matrix is positive definite</returns>
         public bool IsPositiveDefinite()
         {
             try
@@ -403,11 +383,12 @@ namespace REpiceaLight.math
             return ForceConversionToSymmetricMatrix(m);
         }
 
-        /**
-         * Try to convert a Matrix instance to a SymmetricMatrix instance.
-         * @param m a Matrix instance
-         * @return a SymmetricMatrix instance
-         */
+        /// <summary>
+        /// Try to convert a Matrix instance to a SymmetricMatrix instance.
+        /// </summary>
+        /// <param name="m">a Matrix instance</param>
+        /// <returns>a SymmetricMatrix instance</returns>
+        /// <exception cref="InvalidOperationException">if matrix m is not symmetric</exception>        
         public static SymmetricMatrix ConvertToSymmetricIfPossible(Matrix m)
         {
             if (m is SymmetricMatrix)
