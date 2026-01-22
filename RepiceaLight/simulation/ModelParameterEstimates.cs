@@ -26,7 +26,7 @@ namespace REpiceaLight.simulation
             SetEstimatedParameterIndices();
         }
 
-        protected void SetEstimatedParameterIndices()
+        protected virtual void SetEstimatedParameterIndices()
         {
             for (int i = 0; i < GetMean().m_iRows; i++)
                 estimatedParameterIndices.Add(i);
