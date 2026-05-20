@@ -77,7 +77,7 @@ namespace REpiceaLight.stats.distributions
             for (int i = 0; i < errorTerms.m_iRows; i++)
             {
                 GaussianErrorTerm error = this[i];
-                if (error.value == null)
+                if (double.IsNaN(error.value))
                 {
                     error.value = errorTerms.GetValueAt(i, 0);
                 }
@@ -96,7 +96,7 @@ namespace REpiceaLight.stats.distributions
         }
 
 
-        public void Add(GaussianErrorTerm term)
+        public new void Add(GaussianErrorTerm term)
         {
             base.Add(term);
             updated = false;

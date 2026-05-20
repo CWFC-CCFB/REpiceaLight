@@ -26,7 +26,7 @@ namespace REpiceaLight.stats.distributions
     {
 
         internal readonly int distanceIndex;
-        internal double value;
+        internal double value = double.NaN;
         internal readonly double normalizedValue;
 
         public GaussianErrorTerm(IIndexableErrorTerm caller) : this(caller, StatisticalUtility.GetRandom().NextGaussian())
