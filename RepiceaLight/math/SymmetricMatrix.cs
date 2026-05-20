@@ -17,6 +17,9 @@
  *
  * Please see the license at http://www.gnu.org/copyleft/lesser.html.
  */
+using System;
+using System.Collections.Generic;
+
 namespace REpiceaLight.math
 {
     /// <summary>
@@ -96,19 +99,19 @@ namespace REpiceaLight.math
                 return base.ElementWiseMultiply(m);
         }
 
-        public override SymmetricMatrix ExpMatrix()
+        public override Matrix ExpMatrix()
         {
-            SymmetricMatrix matrix = new(m_iRows);
+            SymmetricMatrix matrix = new SymmetricMatrix(m_iRows);
             for (int i = 0; i < matrix.m_iRows; i++)
                 for (int j = i; j < matrix.m_iCols; j++)
                     matrix.SetValueAt(i, j, Math.Exp(GetValueAt(i, j)));
             return matrix;
         }
 
-        public override SymmetricMatrix LogMatrix()
+        public override Matrix LogMatrix()
         {
             bool valid = true;       // default is valid
-            SymmetricMatrix matrix = new(m_iRows);
+            SymmetricMatrix matrix = new SymmetricMatrix(m_iRows);
             for (int i = 0; i < matrix.m_iRows; i++)
             {
                 for (int j = i; j < matrix.m_iCols; j++)
@@ -137,7 +140,7 @@ namespace REpiceaLight.math
             {
                 if (m.Equals(this))
                 {   // multiplied by itself yields a SymmetricMatrix instance
-                    SymmetricMatrix mat = new(m_iRows);
+                    SymmetricMatrix mat = new SymmetricMatrix(m_iRows);
                     for (int i_this = 0; i_this < m_iRows; i_this++)
                         for (int j_m = i_this; j_m < m.m_iCols; j_m++)
                             for (int j_this = 0; j_this < m_iCols; j_this++)
@@ -156,18 +159,18 @@ namespace REpiceaLight.math
             }
         }
 
-        public override SymmetricMatrix ScalarAdd(double d)
+        public override Matrix ScalarAdd(double d)
         {
-            SymmetricMatrix mat = new(m_iRows);
+            SymmetricMatrix mat = new SymmetricMatrix(m_iRows);
             for (int i = 0; i < m_iRows; i++)
                 for (int j = i; j < m_iCols; j++)
                     mat.SetValueAt(i, j, GetValueAt(i, j) + d);
             return mat;
         }
 
-        public override SymmetricMatrix ScalarMultiply(double d)
+        public override Matrix ScalarMultiply(double d)
         {
-            SymmetricMatrix mat = new(m_iRows);
+            SymmetricMatrix mat = new SymmetricMatrix(m_iRows);
             for (int i = 0; i < m_iRows; i++)
                 for (int j = i; j < m_iCols; j++)
                     mat.SetValueAt(i, j, GetValueAt(i, j) * d);
@@ -197,7 +200,7 @@ namespace REpiceaLight.math
                 throw new InvalidOperationException("This instance and the Matrix m are not of the same dimension!");
             if (m.IsSymmetric())
             {
-                SymmetricMatrix mat = new(m_iRows);
+                SymmetricMatrix mat = new SymmetricMatrix(m_iRows);
                 for (int i = 0; i < m_iRows; i++)
                     for (int j = i; j < m_iCols; j++)
                         mat.SetValueAt(i, j, GetValueAt(i, j) - m.GetValueAt(i, j));
@@ -214,7 +217,7 @@ namespace REpiceaLight.math
         public Matrix SymSquare()
         {
             int numberOfElements = (m_iCols + 1) * m_iCols / 2;
-            Matrix outputMatrix = new(numberOfElements, 1);
+            Matrix outputMatrix = new Matrix(numberOfElements, 1);
             int pointer = 0;
             Matrix tmp;
             for (int i = 0; i < m_iCols; i++)
@@ -231,16 +234,16 @@ namespace REpiceaLight.math
             return this;
         }
 
-        public override SymmetricMatrix PowMatrix(double seed)
+        public override Matrix PowMatrix(double seed)
         {
-            SymmetricMatrix matrix = new(m_iRows);
+            SymmetricMatrix matrix = new SymmetricMatrix(m_iRows);
             for (int i = 0; i < matrix.m_iRows; i++)
                 for (int j = i; j < matrix.m_iCols; j++)
                     matrix.SetValueAt(i, j, Math.Pow(seed, GetValueAt(i, j)));
             return matrix;
         }
 
-        public override SymmetricMatrix ElementWisePower(double power)
+        public override Matrix ElementWisePower(double power)
         {
             SymmetricMatrix matrix = new SymmetricMatrix(m_iRows);
             for (int i = 0; i < matrix.m_iRows; i++)
@@ -250,9 +253,9 @@ namespace REpiceaLight.math
         }
 
 
-        public override SymmetricMatrix GetAbsoluteValue()
+        public override Matrix GetAbsoluteValue()
         {
-            SymmetricMatrix oMat = new(m_iRows);
+            SymmetricMatrix oMat = new SymmetricMatrix(m_iRows);
             for (int i = 0; i < m_iRows; i++)
                 for (int j = i; j < m_iCols; j++)
                     oMat.SetValueAt(i, j, Math.Abs(GetValueAt(i, j)));
@@ -264,7 +267,7 @@ namespace REpiceaLight.math
         {
             if (m.IsSymmetric())
             {
-                SymmetricMatrix result = new(m_iRows * m.m_iRows);
+                SymmetricMatrix result = new SymmetricMatrix(m_iRows * m.m_iRows);
                 for (int i1 = 0; i1 < m_iRows; i1++)
                     for (int j1 = i1; j1 < m_iCols; j1++)
                         for (int i2 = 0; i2 < m.m_iRows; i2++)
@@ -282,7 +285,7 @@ namespace REpiceaLight.math
         /// <returns>a SymmetricMatrix instance</returns>
         public SymmetricMatrix GetIsserlisMatrix()
         {
-            SymmetricMatrix output = new(m_iRows * m_iRows);
+            SymmetricMatrix output = new SymmetricMatrix(m_iRows * m_iRows);
             double covariance;
             int indexRow;
             int indexCol;
@@ -317,7 +320,7 @@ namespace REpiceaLight.math
         public virtual Matrix GetLowerCholTriangle()
         {
             int m1Row = m_iRows;
-            Matrix matrix = new(m1Row, m1Row);
+            Matrix matrix = new Matrix(m1Row, m1Row);
             double dTmp;
             for (int i = 0; i < m1Row; i++)
             {
@@ -368,16 +371,16 @@ namespace REpiceaLight.math
             }
         }
 
-        public override SymmetricMatrix Clone()
+        public override object Clone()
         {
-            SymmetricMatrix oMat = new(m_iRows);
+            SymmetricMatrix oMat = new SymmetricMatrix(m_iRows);
             for (int i = 0; i < m_iRows; i++)
                 for (int j = i; j < m_iCols; j++)
                     oMat.SetValueAt(i, j, GetValueAt(i, j));
             return oMat;
         }
 
-        internal override SymmetricMatrix GetInternalInverseMatrix()
+        internal override Matrix GetInternalInverseMatrix()
         {
             Matrix m = base.GetInternalInverseMatrix();
             return ForceConversionToSymmetricMatrix(m);
@@ -409,7 +412,7 @@ namespace REpiceaLight.math
                     throw new InvalidOperationException("Matrix m must be a square matrix!");
                 else
                 {
-                    SymmetricMatrix sm = new(m.m_iRows);
+                    SymmetricMatrix sm = new SymmetricMatrix(m.m_iRows);
                     for (int i = 0; i < m.m_iRows; i++)
                         for (int j = i; j < m.m_iRows; j++)
                             sm.SetValueAt(i, j, m.GetValueAt(i, j));
@@ -425,7 +428,7 @@ namespace REpiceaLight.math
             {
                 int m1Row = m_iRows;
                 int m2Row = m.m_iRows;
-                SymmetricMatrix matrix = new(m1Row + m2Row);
+                SymmetricMatrix matrix = new SymmetricMatrix(m1Row + m2Row);
                 for (int i = 0; i < m1Row; i++)
                     for (int j = i; j < m1Row; j++)
                         matrix.SetValueAt(i, j, GetValueAt(i, j));
@@ -439,7 +442,7 @@ namespace REpiceaLight.math
         }
 
 
-        public override SymmetricMatrix GetInverseMatrix()
+        public override Matrix GetInverseMatrix()
         {
             if (IsDiagonalMatrix())
             {       // procedure for diagonal matrices
@@ -450,7 +453,7 @@ namespace REpiceaLight.math
                 return GetInternalInverseMatrix();
             else
             {
-                SymmetricMatrix inverseMatrix = new(m_iRows);
+                SymmetricMatrix inverseMatrix = new SymmetricMatrix(m_iRows);
                 foreach (List<int> blockIndex in indices)
                 {
                     Matrix invSubMatrix = GetSubMatrix(blockIndex, blockIndex).GetInternalInverseMatrix();

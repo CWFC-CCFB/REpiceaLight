@@ -1,16 +1,31 @@
-﻿using REpiceaLight.math;
+﻿/*
+ * This file is part of the REpiceaLight library.
+ *
+ * Copyright (C) 2026 His Majesty the King in right of Canada
+ * Author: Mathieu Fortin, Canadian Forest Service
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 3 of the License, or (at your option) any later version.
+ *
+ * This library is distributed with the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * License for more details.
+ *
+ * Please see the license at http://www.gnu.org/copyleft/lesser.html.
+ */
+using REpiceaLight.math;
 using REpiceaLight.simulation.covariateproviders.samplelevel;
 using REpiceaLight.stats.estimates;
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace REpiceaLight.simulation
 {
+
     public abstract class SensitivityAnalysisParameter<E> : IStochasticImplementation where E : IEstimate
     {
 
@@ -21,25 +36,16 @@ namespace REpiceaLight.simulation
         protected SensitivityAnalysisParameter(bool isParametersVariabilityEnabled)
         {
             this.isParametersVariabilityEnabled = isParametersVariabilityEnabled;
-            simulatedParameters = new();
+            simulatedParameters = new Dictionary<int, Matrix>();
         }
 
-        protected void SetParameterEstimates(E estimate)
+        protected virtual void SetParameterEstimates(E estimate)
         {
             this.parameterEstimates = estimate;
         }
 
         protected E GetParameterEstimates() { return parameterEstimates; }
 
-
-        /**
-         * This method calls the setSpecificParametersDeviateForThisRealization method if the parameter variability is enabled and returns 
-         * a realization-specific simulated vector of model parameters. Otherwise it returns a default vector (beta). Note that the simulated
-         * parameters are related to the Monte Carlo realization. For instance, all subject in a given Monte Carlo realization will have the
-         * same simulation parameters. 
-         * @param subject a subject that implements the MonteCarloSimulationCompliantObject interface
-         * @return a vector of parameters
-         */
         [MethodImpl(MethodImplOptions.Synchronized)]
         protected virtual Matrix GetParametersForThisRealization(IMonteCarloSimulationCompliantObject subject)
         {

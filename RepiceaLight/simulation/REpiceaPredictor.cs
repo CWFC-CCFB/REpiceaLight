@@ -1,39 +1,53 @@
-﻿using REpiceaLight.math;
-using REpiceaLight.simulation;
+﻿/*
+ * This file is part of the REpiceaLight library.
+ *
+ * Copyright (C) 2026 His Majesty the King in right of Canada
+ * Author: Mathieu Fortin, Canadian Forest Service
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 3 of the License, or (at your option) any later version.
+ *
+ * This library is distributed with the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * License for more details.
+ *
+ * Please see the license at http://www.gnu.org/copyleft/lesser.html.
+ */
+using REpiceaLight.math;
 using REpiceaLight.stats.distributions;
 using REpiceaLight.stats.estimates;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
-using static REpiceaLight.simulation.REpiceaPredictor;
 using static REpiceaLight.simulation.REpiceaPredictorEvent;
 using static REpiceaLight.stats.distributions.GaussianErrorTermList;
-using static System.Reflection.Metadata.BlobBuilder;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace REpiceaLight.simulation
 {
+    /// <summary>
+    /// An abstract class for any statistical model to be implemented. It provides all the features
+    /// to run a model in either stochastic or deterministic mode.
+    /// </summary>
     public abstract class REpiceaPredictor : SensitivityAnalysisParameter<ModelParameterEstimates>
     {
 
 
-        protected static readonly List<int> DefaultZeroIndex = new();
+        protected static readonly List<int> DefaultZeroIndex = new List<int>();
         static REpiceaPredictor()
         {
             DefaultZeroIndex.Add(0);
         }
 
-        /**
-         * This class creates a fake subject for interval random effects nested in the plots. 
-         * @author Mathieu Fortin - November 2016
-         */
+        /// <summary>
+        /// An inner class to handle interval random effects nested in the plots
+        /// </summary>
         protected class IntervalNestedInPlotDefinition : IMonteCarloSimulationCompliantObject
         {
-
 
             private readonly int monteCarloRealizationID;
             private readonly string subjectID;
@@ -44,33 +58,18 @@ namespace REpiceaLight.simulation
                 subjectID = GetSubjectID(stand, date);
             }
 
+            public string GetSubjectId() { return subjectID; }
 
-            public string GetSubjectId()
-            {
-                return subjectID;
-            }
+            public HierarchicalLevel GetHierarchicalLevel() { return HierarchicalLevel.INTERVAL_NESTED_IN_PLOT; }
 
-            public HierarchicalLevel GetHierarchicalLevel()
-            {
-                return HierarchicalLevel.INTERVAL_NESTED_IN_PLOT;
-            }
-
-
-            public int GetMonteCarloRealizationId()
-            {
-                return monteCarloRealizationID;
-            }
-
-            internal static string GetSubjectID(IMonteCarloSimulationCompliantObject stand, int date)
-            {
-                return stand.GetSubjectId() + "_" + date;
-            }
+            public int GetMonteCarloRealizationId() { return monteCarloRealizationID; }
+            
+            internal static string GetSubjectID(IMonteCarloSimulationCompliantObject stand, int date) { return stand.GetSubjectId() + "_" + date; }
         }
 
-        /**
-         * This class creates a fake subject for cruise line random effects.
-         * @author Mathieu Fortin - April 2017
-         */
+        /// <summary>
+        /// An inner class to handle cruise line random effects.
+        /// </summary>
         protected class CruiseLine : IMonteCarloSimulationCompliantObject
         {
 
@@ -90,16 +89,13 @@ namespace REpiceaLight.simulation
             public int GetMonteCarloRealizationId() { return monteCarloRealizationID; }
         }
 
-
         public enum ErrorTermGroup { Default }
-
 
         protected readonly System.Collections.Concurrent.ConcurrentDictionary<IREpiceaPredictorListener, int> listeners;
 
 
         private readonly Dictionary<string, CruiseLine> cruiseLineMap;
         private readonly Dictionary<string, IntervalNestedInPlotDefinition> intervalLists;
-
 
         // set by the constructor
         protected readonly bool isRandomEffectsVariabilityEnabled;
@@ -116,15 +112,12 @@ namespace REpiceaLight.simulation
         private readonly Dictionary<Enum, GaussianErrorTermEstimate> defaultResidualError;
         readonly Dictionary<string, GaussianErrorTermList> simulatedResidualError;        // refers to the subject + realization ids
 
-        //	protected REpiceaRandom random = new REpiceaRandom();
-
-
-        /**
-         * General constructor for all combinations of uncertainty sources.
-         * @param isParametersVariabilityEnabled a boolean that enables the variability at the parameter level
-         * @param isRandomEffectsVariabilityEnabled a boolean that enables the variability at the random effect level
-         * @param isResidualVariabilityEnabled a boolean that enables the variability at the tree level
-         */
+        /// <summary>
+        /// General constructor for all combinations of uncertainty sources.
+        /// </summary>
+        /// <param name="isParametersVariabilityEnabled">a boolean that enables the variability at the parameter level</param>
+        /// <param name="isRandomEffectsVariabilityEnabled">a boolean that enables the variability at the random effect level</param>
+        /// <param name="isResidualVariabilityEnabled">a boolean that enables the variability at the tree level</param>
         protected REpiceaPredictor(bool isParametersVariabilityEnabled,
                 bool isRandomEffectsVariabilityEnabled,
                 bool isResidualVariabilityEnabled) : base(isParametersVariabilityEnabled)
@@ -132,35 +125,27 @@ namespace REpiceaLight.simulation
             this.isRandomEffectsVariabilityEnabled = isRandomEffectsVariabilityEnabled;
             this.isResidualVariabilityEnabled = isResidualVariabilityEnabled;
 
-            defaultRandomEffects = new();
-            blupsRandomEffects = new();
-            subjectTestedForBlups = new();
+            defaultRandomEffects = new Dictionary<string, GaussianEstimate>();
+            blupsRandomEffects = new Dictionary<string, Dictionary<string, GaussianEstimate>>();
+            subjectTestedForBlups = new Dictionary<string, List<string>>();
 
-            simulatedRandomEffects = new();
-            simulatedResidualError = new();
+            simulatedRandomEffects = new Dictionary<string, Dictionary<string, Matrix>>();
+            simulatedResidualError = new Dictionary<string, GaussianErrorTermList>();
 
-            intervalLists = new();
-            cruiseLineMap = new();
+            intervalLists = new Dictionary<string, IntervalNestedInPlotDefinition>();
+            cruiseLineMap = new Dictionary<string, CruiseLine>();
 
-            defaultResidualError = new();
+            defaultResidualError = new Dictionary<Enum, GaussianErrorTermEstimate>();
 
-            listeners = new();
+            listeners = new System.Collections.Concurrent.ConcurrentDictionary<IREpiceaPredictorListener, int>();
         }
 
-        /**
-         * This method reads all the parameters in .csv files and stores the estimates into members defaultBeta, defaultResidualError,
-         * and defaultRandomEffects.
-         */
         protected abstract void Init();
 
-        protected Dictionary<string, GaussianEstimate> GetDefaultRandomEffects()
-        {
-            return defaultRandomEffects;
-        }
+        protected Dictionary<string, GaussianEstimate> GetDefaultRandomEffects() { return defaultRandomEffects; }
 
-        protected void SetParameterEstimates(ModelParameterEstimates gaussianEstimate)
+        protected override void SetParameterEstimates(ModelParameterEstimates gaussianEstimate) 
         {
-            //		super.setParameterEstimates(new ModelParameterEstimates(gaussianEstimate, this));
             base.SetParameterEstimates(gaussianEstimate);
             FireModelBasedSimulatorEvent(new REpiceaPredictorEvent(ModelBasedSimulatorEventProperty.DEFAULT_BETA_JUST_SET, null, GetParameterEstimates(), this));
         }
@@ -183,20 +168,15 @@ namespace REpiceaLight.simulation
             FireModelBasedSimulatorEvent(new REpiceaPredictorEvent(ModelBasedSimulatorEventProperty.DEFAULT_RESIDUAL_ERROR_JUST_SET, null, new object[] { enumVar, estimate }, this));
         }
 
-        protected GaussianErrorTermEstimate GetDefaultResidualError(Enum enumVar)
-        {
-            return defaultResidualError[enumVar];
-        }
+        protected GaussianErrorTermEstimate GetDefaultResidualError(Enum enumVar) { return defaultResidualError[enumVar]; }
 
-
-
-        /**
-         * This method checks if the interval definition is available for the stand at that date. If it is, it returns the
-         * instance. Otherwise, it creates a new interval definition.
-         * @param stand A MonteCarloSimulationCompliantObject that designates the stand
-         * @param date an Integer
-         * @return an IntervalDefinition instance
-         */
+        /// <summary>
+        /// Check if the interval definition is available for the stand at that date. 
+        /// If it is, it returns the instance.Otherwise, it creates a new interval definition.
+        /// </summary>
+        /// <param name="stand">a MonteCarloSimulationCompliantObject designating the plot</param>
+        /// <param name="date">an Integer</param>
+        /// <returns>an IntervalDefinition instance</returns>
         [MethodImpl(MethodImplOptions.Synchronized)]
         protected IntervalNestedInPlotDefinition GetIntervalNestedInPlotDefinition(IMonteCarloSimulationCompliantObject stand, int date)
         {
@@ -211,12 +191,10 @@ namespace REpiceaLight.simulation
             return intDef;
         }
 
-        /**
-         * This method checks if a cruise line exists for this plot
-         * @param cruiseLineID the id of the cruise line
-         * @param stand a MonteCarloSimulationCompliantObject instance
-         * @return a CruiseLine instance
-         */
+        /// <summary>Provide the CruiseLine instance for a plot.</summary>
+        /// <param name="cruiseLineID">the id of the cruise line</param>
+        /// <param name="stand">a MonteCarloSimulationCompliantObject instance</param>
+        /// <returns></returns>
         [MethodImpl(MethodImplOptions.Synchronized)]
         protected CruiseLine GetCruiseLineForThisSubject(string cruiseLineID, IMonteCarloSimulationCompliantObject stand)
         {
@@ -227,14 +205,12 @@ namespace REpiceaLight.simulation
             return cruiseLineMap[cruiseLineIDPlusMCRealization];
         }
 
-        /**
-         * This method calls the setSpecificParametersDeviateForThisRealization method if the parameter variability is enabled and returns 
-         * a realization-specific simulated vector of model parameters. Otherwise it returns a default vector (beta). Note that the simulated
-         * parameters are related to the Monte Carlo realization. For instance, all subject in a given Monte Carlo realization will have the
-         * same simulation parameters. 
-         * @param subject a subject that implements the MonteCarloSimulationCompliantObject interface
-         * @return a vector of parameters
-         */
+        /// <summary>
+        /// Provide random deviates of the parameter estimates in cases of stochastic simulation or the
+        /// mean parameter estimates in cases of deterministic simulation.
+        /// </summary>
+        /// <param name="subject"> a subject that implements the MonteCarloSimulationCompliantObject interface</param>
+        /// <returns>a vector of parameters</returns>
         [MethodImpl(MethodImplOptions.Synchronized)]
         protected override Matrix GetParametersForThisRealization(IMonteCarloSimulationCompliantObject subject)
         {
@@ -250,10 +226,6 @@ namespace REpiceaLight.simulation
         }
 
 
-        /**
-         * This method generates a subject-specific random effects vector using matrix G.
-         * @param subject a MonteCarloSimulationCompliantObject instance
-         */
         private void SetSpecificRandomEffectsForThisSubject(IMonteCarloSimulationCompliantObject subject)
         {
             HierarchicalLevel subjectLevel = subject.GetHierarchicalLevel();
@@ -281,19 +253,11 @@ namespace REpiceaLight.simulation
             FireModelBasedSimulatorEvent(ev);
         }
 
-
-        /**
-         * This method simulates random deviates from an estimate and stores them in the simulatedRandomEffects
-         * member.
-         * @param subject a MonteCarloSimulationCompliantObject instance
-         * @param randomEffectsEstimate the estimate from which the random deviates are generated
-         * @return the random deviates as a Matrix instance (a copy of it)
-         */
         protected Matrix SimulateDeviatesForRandomEffectsOfThisSubject(IMonteCarloSimulationCompliantObject subject, GaussianEstimate randomEffectsEstimate)
         {
             Matrix randomDeviates = randomEffectsEstimate.GetRandomDeviate();
             SetDeviatesForRandomEffectsOfThisSubject(subject, randomDeviates);
-            return randomDeviates.Clone();
+            return (Matrix) randomDeviates.Clone();
         }
 
         [MethodImpl(MethodImplOptions.Synchronized)]
@@ -317,12 +281,11 @@ namespace REpiceaLight.simulation
             return subjectID + "_" + monteCarloRealizationID;
         }
 
-        /**
-         * This method calls the setSpecificPlotRandomEffectsForThisStand method if the random effects variability is enabled and returns 
-         * a stand-specific simulated vector of random effects. Otherwise it returns a default vector (all elements set to 0).
-         * @param subject a MonteCarloSimulationCompliantObject object
-         * @return a Matrix object
-         */
+        /// <summary>
+        /// Provide the random effect for this subject. 
+        /// </summary>
+        /// <param name="subject">a MonteCarloSimulationCompliantObject object</param>
+        /// <returns>a Matrix object</returns>
         [MethodImpl(MethodImplOptions.Synchronized)]
         protected Matrix GetRandomEffectsForThisSubject(IMonteCarloSimulationCompliantObject subject)
         {
@@ -350,23 +313,18 @@ namespace REpiceaLight.simulation
             return simulatedRandomEffects[subjectLevel.GetName()] != null && simulatedRandomEffects[subjectLevel.GetName()].ContainsKey(GetSubjectPlusMonteCarloSpecificId(subject));
         }
 
-
-
-        /**
-         * This method returns the residual error or the vector of residual errors associated with the subjectId.
-         * If the subject parameter is entered as null, the method assumes there is no need to store the simulated
-         * error terms in the simulatedResidualError map. This feature is useful if the residual error terms are 
-         * identically and independently distributed.
-         * @param subject a MonteCarloSimulationCompliantObject instance
-         * @param group an Enum that defines the group in case of different error term specifications
-         * @return a Matrix instance
-         */
+        /// <summary>
+        /// Provide the residual error (stochastic) or its expectation in cases of deterministic simulation.
+        /// </summary>
+        /// <param name="subject">a MonteCarloSimulationCompliantObject instance</param>
+        /// <param name="group">an Enum that defines the group in case of different error term specifications</param>
+        /// <returns>a Matrix instance</returns>
         [MethodImpl(MethodImplOptions.Synchronized)]
-        protected Matrix GetResidualErrorForThisSubject(IMonteCarloSimulationCompliantObject? subject, Enum group)
+        protected Matrix GetResidualErrorForThisSubject(IMonteCarloSimulationCompliantObject subject, Enum group)
         {
             if (isResidualVariabilityEnabled)
             {
-                if (subject != null && subject is IIndexableErrorTerm && defaultResidualError[group].GetDistribution().IsStructured())
+                if (subject != null && subject is IIndexableErrorTerm && ((CenteredGaussianDistribution) defaultResidualError[group].GetDistribution()).IsStructured())
                 {
                     IIndexableErrorTerm indexable = (IIndexableErrorTerm)subject;
                     GaussianErrorTermList list = GetGaussianErrorTerms(subject);
@@ -405,11 +363,6 @@ namespace REpiceaLight.simulation
         }
 
 
-        /**
-         * This method returns the residual error under the assumption of iid and that the error is unique for all groups. 
-         * See the getResidualErrorForThisSubject method.
-         * @return a Matrix instance
-         */
         protected Matrix GetResidualError()
         {
             return GetResidualErrorForThisSubject(null, ErrorTermGroup.Default);
@@ -421,49 +374,37 @@ namespace REpiceaLight.simulation
                 listener.ModelBasedSimulatorDidThis(ev);
             }
 	    }
-	
-	
-	/**
-	 * This method adds the listener instance to the list of listeners.
-	 * @param listener a ModelBasedSimulatorListener listener
-	 */
+
+        /// <summary>
+        /// Add a listener.
+        /// </summary>
+        /// <param name="listener">an IREpiceaPredictorListener instance</param>        
         public void AddModelBasedSimulatorListener(IREpiceaPredictorListener listener)
         {
             if (!listeners.ContainsKey(listener))
                 listeners[listener] = 0;
         }
 
-        /**
-         * This method removes the listener instance from the list of listeners.
-         * @param listener a ModelBasedSimulatorListener listener
-         */
+        /// <summary>
+        /// Remove a listener
+        /// </summary>
+        /// <param name="listener">an IREpiceaPredictorListener instance</param>
         public void RemoveModelBasedSimulatorListener(IREpiceaPredictorListener listener)
         {
-            int i;
-            listeners.Remove(listener, out i);
+            listeners.TryRemove(listener, out int i);
         }
-
-        //	/**
-        //	 * This method enables the recording of the random deviates. By default, this option is set to true.
-        //	 * It can be desirable to set this option to false when running large stochastic simulations.
-        //	 * @param rememberRandomDeviates a boolean
-        //	 */
-        //	public void setRememberRandomDeviates(boolean rememberRandomDeviates) {
-        //		this.rememberRandomDeviates = rememberRandomDeviates;
-        //	}
 
         protected bool DoBlupsExistForThisSubject(IMonteCarloSimulationCompliantObject subject)
         {
             return GetBlupsForThisSubject(subject) != null;
         }
 
-
-        /**
-         * This method returns the blups for the subject or nothing if there is no blups for this subject
-         * @param subject a MonteCarloSimulationCompliantObject instance
-         * @return an Estimate instance or null
-         */
-        protected GaussianEstimate? GetBlupsForThisSubject(IMonteCarloSimulationCompliantObject subject)
+        /// <summary>
+        /// Provide the blups for the subject.
+        /// </summary>
+        /// <param name="subject">a MonteCarloSimulationCompliantObject instance</param>
+        /// <returns>an GaussianEstimate instance or null if the subject has no blups</returns>
+        protected GaussianEstimate GetBlupsForThisSubject(IMonteCarloSimulationCompliantObject subject)
         {
             string hierarchicalName = subject.GetHierarchicalLevel().GetName();
             if (blupsRandomEffects.ContainsKey(hierarchicalName))
@@ -478,7 +419,7 @@ namespace REpiceaLight.simulation
         {
             string hierarchicalName = subject.GetHierarchicalLevel().GetName();
             if (!blupsRandomEffects.ContainsKey(hierarchicalName))
-                blupsRandomEffects[hierarchicalName] = new();
+                blupsRandomEffects[hierarchicalName] = new Dictionary<string, GaussianEstimate>();
 
             blupsRandomEffects[hierarchicalName][subject.GetSubjectId()] = blups;
 
@@ -493,7 +434,7 @@ namespace REpiceaLight.simulation
         {
             string hierarchicalName = subject.GetHierarchicalLevel().GetName();
             if (!subjectTestedForBlups.ContainsKey(hierarchicalName))
-                subjectTestedForBlups[hierarchicalName] = new();
+                subjectTestedForBlups[hierarchicalName] = new List<string>();
 
             if (subjectTestedForBlups[hierarchicalName].Contains(subject.GetSubjectId()))
                 throw new InvalidOperationException("The subject has already been tested for blups!");

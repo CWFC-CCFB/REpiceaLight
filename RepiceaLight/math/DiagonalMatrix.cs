@@ -17,6 +17,8 @@
  *
  * Please see the license at http://www.gnu.org/copyleft/lesser.html.
  */
+using System;
+
 namespace REpiceaLight.math
 {
     /// <summary>
@@ -33,7 +35,8 @@ namespace REpiceaLight.math
 
         protected override double[][] ContructInternalArray(int iRows, int iCols)
         {
-            double[][] mainArray = [new double[iRows]];
+            double[][] mainArray = new double[1][];
+            mainArray[0] = new double[iRows];   
             return mainArray;
         }
 
@@ -68,11 +71,11 @@ namespace REpiceaLight.math
             return true;
         }
 
-        public override DiagonalMatrix ElementWiseDivide(Matrix m)
+        public override Matrix ElementWiseDivide(Matrix m)
         {
             if (IsTheSameDimension(m))
             {
-                DiagonalMatrix oMat = new(m_iRows);
+                DiagonalMatrix oMat = new DiagonalMatrix(m_iRows);
                 for (int i = 0; i < this.m_iRows; i++)
                     oMat.SetValueAt(i, i, GetValueAt(i, i) / m.GetValueAt(i, i));
                 return oMat;
@@ -81,7 +84,7 @@ namespace REpiceaLight.math
                 throw new InvalidOperationException("The matrix m does not have the same dimensions than the current matrix!");
         }
 
-        public override DiagonalMatrix ElementWiseMultiply(Matrix m)
+        public override Matrix ElementWiseMultiply(Matrix m)
         {
             if (IsTheSameDimension(m))
             {
@@ -94,30 +97,30 @@ namespace REpiceaLight.math
                 throw new InvalidOperationException("The matrix m does not have the same dimensions than the current matrix!");
         }
 
-        public override SymmetricMatrix LogMatrix()
+        public override Matrix LogMatrix()
         {
             throw new InvalidOperationException("The DiagonalMatrix class does not support the logMatrix method!");
         }
 
 
-        public override DiagonalMatrix ScalarMultiply(double d)
+        public override Matrix ScalarMultiply(double d)
         {
-            DiagonalMatrix mat = new(m_iRows);
+            DiagonalMatrix mat = new DiagonalMatrix(m_iRows);
             for (int i = 0; i < m_iRows; i++)
                 mat.SetValueAt(i, i, GetValueAt(i, i) * d);
             return mat;
         }
 
-        public override DiagonalMatrix ElementWisePower(double power)
+        public override Matrix ElementWisePower(double power)
         {
-            DiagonalMatrix matrix = new(m_iRows);
+            DiagonalMatrix matrix = new DiagonalMatrix(m_iRows);
             for (int i = 0; i < matrix.m_iRows; i++)
                 matrix.SetValueAt(i, i, Math.Pow(GetValueAt(i, i), power));
             return matrix;
         }
 
 
-        public override DiagonalMatrix GetAbsoluteValue()
+        public override Matrix GetAbsoluteValue()
         {
             DiagonalMatrix oMat = new DiagonalMatrix(m_iRows);
             for (int i = 0; i < m_iRows; i++)
@@ -125,17 +128,17 @@ namespace REpiceaLight.math
             return oMat;
         }
 
-        public override DiagonalMatrix GetLowerCholTriangle()
+        public override Matrix GetLowerCholTriangle()
         {
-            DiagonalMatrix matrix = new(m_iRows);
+            DiagonalMatrix matrix = new DiagonalMatrix(m_iRows);
             for (int i = 0; i < m_iRows; i++)
                 matrix.SetValueAt(i, i, Math.Sqrt(GetValueAt(i, i)));
             return matrix;
         }
 
-        public override DiagonalMatrix Clone()
+        public override object Clone()
         {
-            DiagonalMatrix oMat = new(m_iRows);
+            DiagonalMatrix oMat = new DiagonalMatrix(m_iRows);
             for (int i = 0; i < m_iRows; i++)
                 oMat.SetValueAt(i, i, GetValueAt(i, i));
             return oMat;
@@ -164,9 +167,9 @@ namespace REpiceaLight.math
         }
 
 
-        internal override DiagonalMatrix GetInternalInverseMatrix()
+        internal override Matrix GetInternalInverseMatrix()
         {
-            DiagonalMatrix m = this.ElementWisePower(-1);
+            Matrix m = ElementWisePower(-1);
             return m;
         }
 
@@ -177,7 +180,7 @@ namespace REpiceaLight.math
             {
                 int m1Row = m_iRows;
                 int m2Row = m.m_iRows;
-                DiagonalMatrix matrix = new(m1Row + m2Row);
+                DiagonalMatrix matrix = new DiagonalMatrix(m1Row + m2Row);
                 for (int i = 0; i < m1Row; i++)
                     matrix.SetValueAt(i, i, this.GetValueAt(i, i));
                 for (int i = 0; i < m2Row; i++)
@@ -189,7 +192,7 @@ namespace REpiceaLight.math
         }
 
 
-        public override DiagonalMatrix GetInverseMatrix()
+        public override Matrix GetInverseMatrix()
         {
             return GetInternalInverseMatrix();
         }
@@ -206,7 +209,7 @@ namespace REpiceaLight.math
                     throw new InvalidOperationException("Some off diagonal elements are different from 0!");
                 else
                 {
-                    DiagonalMatrix sm = new(m.m_iRows);
+                    DiagonalMatrix sm = new DiagonalMatrix(m.m_iRows);
                     for (int i = 0; i < m.m_iRows; i++)
                         sm.SetValueAt(i, i, m.GetValueAt(i, i));
                     return sm;

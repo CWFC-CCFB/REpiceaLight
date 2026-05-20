@@ -35,7 +35,7 @@ namespace REpiceaLightTest.math
         [TestMethod]
         public void Test02ValueAttribution()
         {
-            SymmetricMatrix sm = DiagMat.Clone();
+            SymmetricMatrix sm = (SymmetricMatrix) DiagMat.Clone();
             Assert.AreEqual(4, sm.GetValueAt(1, 1), 1E-12);
             Assert.AreEqual(0, sm.GetValueAt(2, 1), 1E-12);
 
@@ -52,7 +52,7 @@ namespace REpiceaLightTest.math
         [TestMethod]
         public void Test03MatrixMultiplicationByItself()
         {
-            DiagonalMatrix sm = DiagMat.Clone();
+            DiagonalMatrix sm = (DiagonalMatrix) DiagMat.Clone();
 
             Matrix smPow2 = sm.Multiply(sm);
 
@@ -64,8 +64,8 @@ namespace REpiceaLightTest.math
         [TestMethod]
         public void Test04InverseMatrix()
         {
-            DiagonalMatrix sm = DiagMat.Clone();
-            DiagonalMatrix invSM = sm.GetInverseMatrix();
+            DiagonalMatrix sm = (DiagonalMatrix) DiagMat.Clone();
+            DiagonalMatrix invSM = (DiagonalMatrix) sm.GetInverseMatrix();
             Matrix smTimesInvSM = sm.Multiply(invSM);
 
             Assert.IsTrue(invSM is DiagonalMatrix);

@@ -1,9 +1,4 @@
 ﻿using REpiceaLight.math;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace REpiceaLightTest.math
 {
@@ -37,7 +32,7 @@ namespace REpiceaLightTest.math
         [TestMethod]
         public void Test02ValueAttribution()
         {
-            SymmetricMatrix sm = SymMat.Clone();
+            SymmetricMatrix sm = (SymmetricMatrix) SymMat.Clone();
             Assert.AreEqual(2, sm.GetValueAt(1, 0), 1E-12);
             Assert.AreEqual(5, sm.GetValueAt(2, 1), 1E-12);
 
@@ -49,7 +44,7 @@ namespace REpiceaLightTest.math
         [TestMethod]
         public void Test03MatrixMultiplicationByItself()
         {
-            SymmetricMatrix sm = SymMat.Clone();
+            SymmetricMatrix sm = (SymmetricMatrix) SymMat.Clone();
 
             //		System.out.println("Matrix sm = " + sm.toString());
             Matrix smPow2 = sm.Multiply(sm);
@@ -100,7 +95,7 @@ namespace REpiceaLightTest.math
         [TestMethod]
         public void Test05InverseMatrix()
         {
-            Matrix sm = SymMat.Clone();
+            Matrix sm = (Matrix) SymMat.Clone();
             Matrix invSM = sm.GetInverseMatrix();
             Matrix smTimesInvSM = sm.Multiply(invSM);
 

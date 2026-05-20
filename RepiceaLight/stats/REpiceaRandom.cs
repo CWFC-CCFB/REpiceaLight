@@ -1,11 +1,26 @@
-﻿using REpiceaLight.math;
+﻿/*
+ * This file is part of the REpiceaLight library.
+ *
+ * Copyright (C) 2026 His Majesty the King in right of Canada
+ * Author: Mathieu Fortin, Canadian Forest Service
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 3 of the License, or (at your option) any later version.
+ *
+ * This library is distributed with the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * License for more details.
+ *
+ * Please see the license at http://www.gnu.org/copyleft/lesser.html.
+ */
+using REpiceaLight.math;
 using REpiceaLight.math.utility;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+using System.Drawing;
 
 namespace REpiceaLight.stats
 {
@@ -56,14 +71,12 @@ namespace REpiceaLight.stats
             }
         }
 
-
-        /**
-         * Returns a random deviate from a beta distribution.
-         *  with scales scale1 and beta.
-         * @param scale1 a double larger than 0
-         * @param scale2 a double larger than 0
-         * @return a double
-         */
+        /// <summary>
+        /// Provide a random realization from a beta distribution with scales sacle1 and scale2.
+        /// </summary>
+        /// <param name="scale1">a double larger than 0</param>
+        /// <param name="scale2">a double larger than 0</param>
+        /// <returns>a double</returns>
         public double NextBeta(double scale1, double scale2)
         {
             double x = NextGamma(scale1, 1d);
@@ -72,13 +85,14 @@ namespace REpiceaLight.stats
         }
 
 
-        /**
-         * Returns a random gamma distributed value following Marsaglia and Tsang's method. The 
-         * mean of the distribution is obtained through the product of the shape and the scale.
-         * @param shape a double larger than 0
-         * @param scale a double larger than 0
-         * @return a double
-         */
+        /// <summary>
+        /// Provide a random realization from a Gamma distribution following Marsaglia and Tsang's method. The 
+        /// mean of the distribution is obtained through the product of the shape and the scale.
+        /// </summary>
+        /// <param name="shape">a double larger than 0</param>
+        /// <param name="scale">a double larger than 0</param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentException"></exception>
         public double NextGamma(double shape, double scale)
         {
             if (shape <= 0d || scale <= 0d)
@@ -90,15 +104,15 @@ namespace REpiceaLight.stats
         }
 
 
-        /**
-         * This method returns a random integer that follows negative binomial distribution.
-         * @param mean the mean of the distribution
-         * @param dispersion the dispersion parameter
-         * @return an integer
-         */
+        /// <summary>
+        /// Produce a random integer that follows negative binomial distribution.
+        /// </summary>
+        /// <param name="mean">the mean of the distribution</param>
+        /// <param name="dispersion">the dispersion parameter</param>
+        /// <returns>an integer</returns>
         public int NextNegativeBinomial(double mean, double dispersion)
         {
-            double threshold = NextDouble();    // to determine how many recruits there are
+            double threshold = NextDouble();   
             double cumulativeProb = 0.0;
             int output = -1;
 
@@ -113,13 +127,22 @@ namespace REpiceaLight.stats
 
 
         /**
-         * Returns a random deviate from the standard Student's t distribution. The algorithm behind 
-         * the random deviate generation is that of Bailey (1994) based on polar generation.
-         * @param df the degrees of freedom
-         * @return a random deviate from the Student's t distribution
-         * @see <a href="https://doi.org/10.1090/S0025-5718-1994-1219702-8"> Bailey, R.W. 1994. Polar generation of random variances with the t-distribution. 
-         * Mathematics of Computation 62(206): 779-781.</a>
-         */
+ * R
+ * @param df 
+ * @return 
+ * @see <a href="https://doi.org/10.1090/S0025-5718-1994-1219702-8"> Bailey, R.W. 1994. Polar generation of random variances with the t-distribution. 
+ * Mathematics of Computation 62(206): 779-781.</a>
+ */
+
+
+        /// <summary>
+        /// Provide a random realization from the standard Student's t distribution. The algorithm is that of 
+        /// Bailey(1994) based on polar generation.
+        /// </summary>
+        /// <param name="df">the degrees of freedom</param>
+        /// <returns>a random deviate from the Student's t distribution</returns>    
+        /// <see href="https://doi.org/10.1090/S0025-5718-1994-1219702-8"> Bailey, R.W. 1994. Polar generation 
+        /// of random variances with the t-distribution. Mathematics of Computation 62(206): 779-781. </see>
         public double NextStudentT(double df)
         {
             double W = 2d;
@@ -143,11 +166,12 @@ namespace REpiceaLight.stats
         }
 
 
-        /**
-         * This method returns a Chi squared random value.
-         * @param df the degrees of freedom
-         * @return a double
-         */
+        /// <summary>
+        /// Provide a random realization from a Chi square distribution.
+        /// </summary>
+        /// <param name="df">the degrees of freedom</param>
+        /// <returns>a double</returns>
+        /// <exception cref="ArgumentException"></exception>
         public double NextChiSquare(int df)
         {
             if (df <= 0)
@@ -155,15 +179,15 @@ namespace REpiceaLight.stats
             return NextGamma(df * .5, 2d);
         }
 
-        /**
-         * This method returns the matrix A in the Bartlett decomposition.
-         * @param df degrees of freedom
-         * @param dim the dimensions of the matrix
-         * @return a Matrix
-         */
+        /// <summary>
+        /// Provide matrix A in the Bartlett decomposition.
+        /// </summary>
+        /// <param name="df">degrees of freedom</param>
+        /// <param name="dim">the dimensions of the matrix</param>
+        /// <returns>a Matrix</returns>
         public Matrix NextBartlettDecompositionMatrix(int df, int dim)
         {
-            Matrix aMat = new(dim, dim);
+            Matrix aMat = new Matrix(dim, dim);
             for (int i = 0; i < aMat.m_iRows; i++)
             {
                 for (int j = 0; j <= i; j++)
@@ -177,52 +201,5 @@ namespace REpiceaLight.stats
             return aMat;
         }
 
-        ///**
-        // * Return a random realization of a Weibull distribution. <br>
-        // * <br>
-        // * The method first draws a realization from a uniform distribution [0,1] and
-        // * then computes the quantile.
-        // * 
-        // * @param k the shape parameter (must be greater than 0)
-        // * @param lambda the scale parameter (must be greater than 0)
-        // * @param theta the location parameter
-        // * @return the realization
-        // */
-        //public double NextWeibull(double k, double lambda, double theta)
-        //{
-        //    return WeibullUtility.getQuantile(NextDouble(), k, lambda, theta);
-        //}
-
-        ///**
-        // * Return a random realization of a Weibull distribution without location parameter. <br>
-        // * <br>
-        // * The method first draws a realization from a uniform distribution [0,1] and
-        // * then computes the quantile.
-        // * 
-        // * @param k the shape parameter (must be greater than 0)
-        // * @param lambda the scale parameter (must be greater than 0)
-        // * @return the realization
-        // */
-        //public double NextWeibull(double k, double lambda)
-        //{
-        //    return NextWeibull(k, lambda, 0d);
-        //}
-
-        ///**
-        // * Return a random realization of a truncated Gaussian distribution. <br>
-        // * <br>
-        // * The method first draws a realization from a uniform distribution [0,1] and
-        // * then computes the quantile.
-        // * 
-        // * @param mu the mean of the original normal distribution
-        // * @param sigma2 the variance of the original distribution
-        // * @param a the lower bound
-        // * @param b the upper bound
-        // * @return the realization
-        // */
-        //public double NextTruncatedGaussian(double mu, double sigma2, double a, double b)
-        //{
-        //    return TruncatedGaussianUtility.GetQuantile(NextDouble(), mu, sigma2, a, b);
-        //}
     }
 }

@@ -10,7 +10,9 @@ A light implementation of the repicea suite in .NET.
 
 Copyright &copy; 2009-2021 Mathieu Fortin for Rouge Epicea.
 
-Copyright &copy; 2021-2025 His Majesty the King in right of Canada (authors: Mathieu Fortin and Jean-Francois Lavoie (CWFC-CCFB, Canadian Forest Service)
+Copyright &copy; 2021-2026 His Majesty the King in right of Canada 
+
+Authors: Mathieu Fortin, Canadian Forest Service and Jean-Francois Lavoie (EFFIXA)
 
 Email: mathieu.fortin.re@gmail.com
 
@@ -27,5 +29,5 @@ License for more details.
 
 Please see the license at http://www.gnu.org/copyleft/lesser.html.
 
-This library is compiled under .NET 8 using Visual Studio 2022.  
+This library is compiled under .NET Standard 2.0 using Visual Studio 2022.  
 

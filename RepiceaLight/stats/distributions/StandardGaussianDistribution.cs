@@ -1,11 +1,25 @@
-﻿using REpiceaLight.math.utility;
+﻿/*
+ * This file is part of the REpiceaLight library.
+ *
+ * Copyright (C) 2026 His Majesty the King in right of Canada
+ * Author: Mathieu Fortin, Canadian Forest Service
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 3 of the License, or (at your option) any later version.
+ *
+ * This library is distributed with the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * License for more details.
+ *
+ * Please see the license at http://www.gnu.org/copyleft/lesser.html.
+ */
+using REpiceaLight.math.utility;
 using REpiceaLight.math;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace REpiceaLight.stats.distributions
 {
@@ -18,14 +32,15 @@ namespace REpiceaLight.stats.distributions
         private SymmetricMatrix sigma2;
         private Matrix lowerCholTriangle;
 
-        /**
-         * This constructor creates a Gaussian distribution with mean mu 0 and variance 1.
-         */
+
+        /// <summary>
+        /// Constructor to create a Gaussian distribution with mean mu 0 and variance 1.
+        /// </summary>
         internal StandardGaussianDistribution()
         {
-            Matrix mu = new(1, 1);
+            Matrix mu = new Matrix(1, 1);
             SetMean(mu);
-            SymmetricMatrix sigma2 = new(1);
+            SymmetricMatrix sigma2 = new SymmetricMatrix(1);
             sigma2.SetValueAt(0, 0, 1d);
             SetVariance(sigma2);
         }
@@ -40,13 +55,17 @@ namespace REpiceaLight.stats.distributions
             this.sigma2 = sigma2;
         }
 
-        /**
-         * This method returns the single instance of the StandardGaussianDistribution class.
-         * @return a StandardGaussianDistribution instance
-         */
+
+        /// <summary>
+        /// Returns the single instance of the StandardGaussianDistribution class.
+        /// </summary>
+        /// <returns>a StandardGaussianDistribution instance</returns>
         public static StandardGaussianDistribution GetInstance()
         {
-            Singleton ??= new StandardGaussianDistribution();
+            if (Singleton == null)
+            {
+                Singleton = new StandardGaussianDistribution();
+            }
             return Singleton;
         }
 
@@ -59,15 +78,15 @@ namespace REpiceaLight.stats.distributions
         {
             Matrix mean = GetMean();
             Matrix standardDeviation = GetStandardDeviation();
-            Matrix normalStandardDeviates = StatisticalUtility.DrawRandomVector(standardDeviation.m_iRows,
-                IDistribution.DistributionType.GAUSSIAN);
+            Matrix normalStandardDeviates = StatisticalUtility.DrawRandomVector(standardDeviation.m_iRows, DistributionType.GAUSSIAN);
             return mean.Add(standardDeviation.Multiply(normalStandardDeviates));
         }
 
-        /**
-         * This method returns the lower triangle of the Cholesky decomposition of the variance-covariance matrix.
-         * @return a Matrix instance
-         */
+
+        /// <summary>
+        /// Provide the lower triangle of the Cholesky decomposition of the variance-covariance matrix.
+        /// </summary>
+        /// <returns>a Matrix</returns>
         public Matrix GetStandardDeviation()
         {
             if (lowerCholTriangle == null)
@@ -81,7 +100,7 @@ namespace REpiceaLight.stats.distributions
 
         public SymmetricMatrix GetVariance() { return GetSigma2(); }
 
-        public IDistribution.DistributionType GetDistributionType() { return IDistribution.DistributionType.GAUSSIAN; }
+        public DistributionType GetDistributionType() { return DistributionType.GAUSSIAN; }
 
         protected Matrix GetMu() { return mu; }
 
@@ -90,11 +109,18 @@ namespace REpiceaLight.stats.distributions
         public bool IsParametric() { return true; }
 
 
-        /**
-         * This method returns the result of the probability density function of the distribution parameter.
-         * @param yValues a single double value or a Matrix instance
-         * @return a double
-         */
+        public bool IsUnivariate()
+        {
+            return !IsMultivariate();
+        }
+
+
+        /// <summary>
+        /// Return the result of the probability density function of the distribution parameter.
+        /// </summary>
+        /// <param name="yValues">a single double value or a Matrix instance</param>
+        /// <returns>a double</returns>
+        /// <exception cref="InvalidOperationException"></exception>
         public double GetProbabilityDensity(Matrix yValues)
         {
             if (yValues == null || !yValues.IsTheSameDimension(GetMu()))

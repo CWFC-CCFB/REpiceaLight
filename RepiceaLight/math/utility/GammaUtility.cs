@@ -17,6 +17,8 @@
  *
  * Please see the license at http://www.gnu.org/copyleft/lesser.html.
  */
+using System;
+
 namespace REpiceaLight.math.utility
 {
 

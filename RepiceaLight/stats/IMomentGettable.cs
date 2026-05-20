@@ -1,26 +1,42 @@
-﻿using REpiceaLight.math;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿/*
+ * This file is part of the REpiceaLight library.
+ *
+ * Copyright (C) 2026 His Majesty the King in right of Canada
+ * Author: Mathieu Fortin, Canadian Forest Service
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 3 of the License, or (at your option) any later version.
+ *
+ * This library is distributed with the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * License for more details.
+ *
+ * Please see the license at http://www.gnu.org/copyleft/lesser.html.
+ */
+using REpiceaLight.math;
+
 
 namespace REpiceaLight.stats
 {
     public interface IMomentGettable
     {
 
-        /**
-         * This method returns the first central moment, i.e. the mean vector, of the random variable.
-         * @return an AbstractMatrix-derived instance
-         */
-        public Matrix GetMean();
 
-        /**
-         * This method returns the second central moment, i.e. the variance-covariance matrix, of the random variable.
-         * @return an AbstractMatrix-derived instance
-         */
-        public SymmetricMatrix GetVariance();
+        /// <summary>
+        /// Provide the first central moment, i.e. the mean vector, of the random variable.
+        /// </summary>
+        /// <returns>a Matrix instance</returns>
+        Matrix GetMean();
+
+        /// <summary>
+        /// Provide the second central moment, i.e. the variance-covariance matrix, of the random variable.
+        /// </summary>
+        /// <returns>a SymmetricMatrix instance</returns>
+        SymmetricMatrix GetVariance();
 
 
     }

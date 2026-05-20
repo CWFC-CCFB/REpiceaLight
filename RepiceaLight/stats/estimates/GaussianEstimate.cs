@@ -1,12 +1,24 @@
-﻿using REpiceaLight.math.utility;
+﻿/*
+ * This file is part of the REpiceaLight library.
+ *
+ * Copyright (C) 2026 His Majesty the King in right of Canada
+ * Author: Mathieu Fortin, Canadian Forest Service
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 3 of the License, or (at your option) any later version.
+ *
+ * This library is distributed with the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * License for more details.
+ *
+ * Please see the license at http://www.gnu.org/copyleft/lesser.html.
+ */
+using REpiceaLight.math.utility;
 using REpiceaLight.math;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.Serialization;
-using System.Text;
-using System.Threading.Tasks;
-using static REpiceaLight.stats.estimates.IEstimate;
 using REpiceaLight.stats.distributions;
 
 namespace REpiceaLight.stats.estimates
@@ -14,33 +26,33 @@ namespace REpiceaLight.stats.estimates
     public class GaussianEstimate : AbstractEstimate, IMomentSettable
     {
 
-        /**
-         * Common constructor. By default the Gaussian distribution that supports this estimate has a mean 0 and a variance 1.
-         */
+        /// <summary>
+        /// Common constructor. By default the Gaussian distribution that supports this estimate has a mean 0 and a variance 1.
+        /// </summary>
         public GaussianEstimate() : base(new GaussianDistribution())
         {
             estimatorType = EstimatorType.LikelihoodBased;
         }
 
-        /**
-         * Constructor with the mean and variance.
-         * @param mean a Matrix instance that contains the mean 
-         * @param variance a SymmetricMatrix instance that contains the variance-covariance
-         */
+        /// <summary>
+        /// Constructor with the mean and variance.
+        /// </summary>
+        /// <param name="mean">a Matrix instance that contains the mean </param>
+        /// <param name="variance">a SymmetricMatrix instance that contains the variance-covariance</param>
         public GaussianEstimate(Matrix mean, SymmetricMatrix variance) : this()
         {
             SetMean(mean);
             SetVariance(variance);
         }
 
-        /**
-         * Constructor for univariate distribution.
-         * @param mean a double that stands for the mean
-         * @param variance a double that stands for the variance
-         */
+        /// <summary>
+        /// Constructor for univariate distribution.
+        /// </summary>
+        /// <param name="mean">a double that stands for the mean</param>
+        /// <param name="variance">a double that stands for the variance</param>
         public GaussianEstimate(double mean, double variance) : this()
         {
-            Matrix meanMat = new(1, 1);
+            Matrix meanMat = new Matrix(1, 1);
             meanMat.SetValueAt(0, 0, mean);
             SymmetricMatrix varianceMat = new SymmetricMatrix(1);
             varianceMat.SetValueAt(0, 0, variance);

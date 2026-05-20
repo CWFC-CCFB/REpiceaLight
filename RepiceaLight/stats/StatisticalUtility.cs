@@ -1,14 +1,35 @@
-﻿using REpiceaLight.math;
+﻿/*
+ * This file is part of the REpiceaLight library.
+ *
+ * Copyright (C) 2026 His Majesty the King in right of Canada
+ * Author: Mathieu Fortin, Canadian Forest Service
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 3 of the License, or (at your option) any later version.
+ *
+ * This library is distributed with the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * License for more details.
+ *
+ * Please see the license at http://www.gnu.org/copyleft/lesser.html.
+ */
+using REpiceaLight.math;
 using REpiceaLight.math.utility;
 using System;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static REpiceaLight.stats.StatisticalUtility;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+using System.Collections.Generic;
+using System.Data.Common;
+using System.Drawing;
+using System.Threading;
 
 namespace REpiceaLight.stats
 {
+    /// <summary>
+    /// A class with static methods applied to statistics.
+    /// </summary>
     public sealed class StatisticalUtility
     {
 
@@ -24,7 +45,7 @@ namespace REpiceaLight.stats
             EXPONENTIAL
         }
 
-        private static readonly Dictionary<TypeMatrixR, int> NbParmsMap = new();
+        private static readonly Dictionary<TypeMatrixR, int> NbParmsMap = new Dictionary<TypeMatrixR, int>();
 
         static StatisticalUtility()
         {
@@ -36,15 +57,12 @@ namespace REpiceaLight.stats
             NbParmsMap[TypeMatrixR.EXPONENTIAL] = 2;
         }
 
-
-
-
-        /**
-         * This method is a shortcut for inverting an AR1 correlation matrix.
-         * @param size the size of the matrix
-         * @param rho the correlation between two successive observations
-         * @return a Matrix
-         */
+        /// <summary>
+        ///  Provide a shortcut for inverting an AR1 correlation matrix.
+        /// </summary>
+        /// <param name="size">the size of the matrix</param>
+        /// <param name="rho">the correlation between two successive observations</param>
+        /// <returns>a Matrix instance</returns>
         public static Matrix GetInverseCorrelationAR1Matrix(int size, double rho)
         {
             if (size < 1)
@@ -52,7 +70,7 @@ namespace REpiceaLight.stats
             if (rho <= 0 || rho >= 1)
                 throw new ArgumentException("The rho parameter must be greater than 0 and smaller than 1!");
             double rho2 = rho * rho;
-            Matrix mat = new(size, size);
+            Matrix mat = new Matrix(size, size);
             for (int i = 0; i < mat.m_iRows; i++)
             {
                 for (int j = i; j < mat.m_iCols; j++)
@@ -74,113 +92,29 @@ namespace REpiceaLight.stats
             return mat;
         }
 
-        //  /**
-        //* Construct a within-subject correlation matrix using a variance parameter, a correlation parameter and a column vector of coordinates. <p>
-        //* @param coordinates a column vector of coordinates from which the distances are calculated
-        //* @param varianceParameter the variance parameter
-        //* @param covarianceParameter the covariance parameter
-        //* @param type the type of correlation
-        //* @return the resulting matrix
-        //* @deprecated This method is no longer acceptable. Use {@link #constructRMatrix(List, TypeMatrixR, Matrix...)} instead.
-        //*/
-        //  @Deprecated
-        //  protected static Matrix constructRMatrix(Matrix coordinates, double varianceParameter, double covarianceParameter, TypeMatrixR type)
-        //  {
-        //      if (!coordinates.isColumnVector())
-        //      {
-        //          throw new UnsupportedOperationException("Matrix.constructRMatrix() : The coordinates matrix is not a column vector");
-        //      }
-        //      else
-        //      {
-        //          int nrow = coordinates.m_iRows;
-        //          Matrix matrixR = new Matrix(nrow, nrow);
-        //          for (int i = 0; i < nrow; i++)
-        //          {
-        //              for (int j = i; j < nrow; j++)
-        //              {
-        //                  double corr = 0d;
-        //                  switch (type)
-        //                  {
-        //                      case LINEAR:                    // linear case
-        //                          corr = 1 - covarianceParameter * Math.abs(coordinates.getValueAt(i, 0) - coordinates.getValueAt(j, 0));
-        //                          if (corr >= 0)
-        //                          {
-        //                              matrixR.setValueAt(i, j, varianceParameter * corr);
-        //                              matrixR.setValueAt(j, i, varianceParameter * corr);
-        //                          }
-        //                          break;
-        //                      case LINEAR_LOG:                // linear log case
-        //                          if (Math.abs(coordinates.getValueAt(i, 0) - coordinates.getValueAt(j, 0)) == 0)
-        //                          {
-        //                              corr = 1d;
-        //                          }
-        //                          else
-        //                          {
-        //                              corr = 1 - covarianceParameter * Math.log(Math.abs(coordinates.getValueAt(i, 0) - coordinates.getValueAt(j, 0)));
-        //                          }
-        //                          if (corr >= 0)
-        //                          {
-        //                              matrixR.setValueAt(i, j, varianceParameter * corr);
-        //                              matrixR.setValueAt(j, i, varianceParameter * corr);
-        //                          }
-        //                          break;
-        //                      case COMPOUND_SYMMETRY:
-        //                          if (i == j)
-        //                          {
-        //                              matrixR.setValueAt(i, j, varianceParameter + covarianceParameter);
-        //                          }
-        //                          else
-        //                          {
-        //                              matrixR.setValueAt(i, j, covarianceParameter);
-        //                              matrixR.setValueAt(j, i, covarianceParameter);
-        //                          }
-        //                          break;
-        //                      case POWER:                  // power case
-        //                          if (Math.abs(coordinates.getValueAt(i, 0) - coordinates.getValueAt(j, 0)) == 0)
-        //                          {
-        //                              corr = 1d;
-        //                          }
-        //                          else
-        //                          {
-        //                              corr = Math.pow(covarianceParameter, (Math.abs(coordinates.getValueAt(i, 0) - coordinates.getValueAt(j, 0))));
-        //                          }
-        //                          if (corr >= 0)
-        //                          {
-        //                              matrixR.setValueAt(i, j, varianceParameter * corr);
-        //                              matrixR.setValueAt(j, i, varianceParameter * corr);
-        //                          }
-        //                          break;
-        //                      default:
-        //                          throw new UnsupportedOperationException("Matrix.ConstructRMatrix() : This type of correlation structure: " + type + " is not supported in this function");
-        //                  }
-        //              }
-        //          }
-        //          return matrixR;
-        //      }
-        //  }
-
+        
         public static SymmetricMatrix ConstructRMatrix(List<double> covParms, TypeMatrixR type, Matrix coordinates)
         {
-            return ConstructRMatrix(covParms, type, [coordinates]);
+            return ConstructRMatrix(covParms, type, new Matrix[]{ coordinates});
         }
 
-
-        /**
-         * Compute the R matrix. <p>
-         * Compute the R matrix of the type set by the type argument. 
-         * 
-         * @param covParms a List of double containing the parameter. The first is the variance parameter, the second is the 
-         * covariance parameter. In case of ARMA type, there is a third parameter which is the gamma parameter.
-         * @param type a TypeMatrixR enum
-         * @param coordinates a series of Matrices instance that stand for the coordinates. These should be column vectors of 
-         * the same size. Specifying two matrices implies that the Euclidean distance is based on two dimensions. Three matrices
-         * means three dimensions and so on.
-         * @return a SymmetricMatrix instance
-         */
+        /// <summary>
+        /// Compute the R matrix of the type set by the type argument.
+        /// </summary>
+        /// <param name="covParms">a List of double containing the parameters. The first is the variance parameter, 
+        /// the second is the covariance parameter.In case of ARMA type, there is a third parameter which is the 
+        /// gamma parameter.</param>
+        /// <param name="type">a TypeMatrixR enum</param>
+        /// <param name="coordinates">a series of Matrices instance that stand for the coordinates. These should
+        /// be column vectors of the same size.Specifying two matrices implies that the Euclidean distance is based 
+        /// on two dimensions. Three matrices means three dimensions and so on.</param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentException"></exception>
+        /// <exception cref="InvalidOperationException"></exception>
         public static SymmetricMatrix ConstructRMatrix(List<double> covParms, TypeMatrixR type, Matrix[] coordinates)
         {
             if (covParms == null || covParms.Count < NbParmsMap[type])
-                throw new ArgumentException("The covParms list should contain this number of parameters: " + NbParmsMap[type] + " when using type " + Enum.GetName(type));
+                throw new ArgumentException("The covParms list should contain this number of parameters: " + NbParmsMap[type] + " when using type " + type.ToString());
             if (coordinates == null || coordinates.Length == 0)
                 throw new ArgumentException("The coordinates argument should contain at least one matrix.");
             int nrow = -1;
@@ -275,82 +209,68 @@ namespace REpiceaLight.stats
             return matrixR;
         }
 
-
-
-        /**
-         * Generate a random vector
-         * @param nrow the number of elements to be generated
-         * @param type the distribution type (a Distribution.Type enum variable)
-         * @return a Matrix instance
-         */
-        public static Matrix DrawRandomVector(int nrow, IDistribution.DistributionType type)
+        /// <summary>
+        /// Generate a random vector.
+        /// </summary>
+        /// <param name="nrow"> the number of elements to be generated</param>
+        /// <param name="type">the distribution type (a DistributionType enum variable)</param>
+        /// <returns></returns>
+        public static Matrix DrawRandomVector(int nrow, DistributionType type)
         {
             return StatisticalUtility.DrawRandomVector(nrow, type, StatisticalUtility.GetRandom());
         }
 
 
-        /**
-         * Return a Random generator.
-         * @return a Random instance
-         */
+        /// <summary>
+        /// Provide the singleton of the REpiceaRandom class.
+        /// </summary>
+        /// <returns>the REpiceaRandom singleton</returns>
         public static REpiceaRandom GetRandom()
         {
-            random ??= new REpiceaRandom();
+            if (random == null)
+            {
+                random = new REpiceaRandom();
+            }
             return random;
         }
 
-        /**
-         * This method generates a random vector
-         * @param nrow the number of elements to be generated
-         * @param type the distribution type (a Distribution enum variable)
-         * @param random a Random instance
-         * @return a Matrix instance
-         */
-        public static Matrix DrawRandomVector(int nrow, IDistribution.DistributionType type, REpiceaRandom random)
+        /// <summary>
+        /// Generate a random vector
+        /// </summary>
+        /// <param name="nrow">the number of elements to be generated</param>
+        /// <param name="type"the distribution type (a DistributionType enum variable)></param>
+        /// <param name="random">an REpiceaRandom instance</param>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException"></exception>
+        public static Matrix DrawRandomVector(int nrow, DistributionType type, REpiceaRandom random)
         {
-            //try
-            //{
-            //            bool valid = true;
-            Matrix matrix = new(nrow, 1);
+            Matrix matrix = new Matrix(nrow, 1);
             for (int i = 0; i < nrow; i++)
             {
                 double number;
                 switch (type)
                 {
-                    case IDistribution.DistributionType.GAUSSIAN:      // Gaussian random number ~ N(0,1)
+                    case DistributionType.GAUSSIAN:      // Gaussian random number ~ N(0,1)
                         number = random.NextGaussian();
                         break;
-                    case IDistribution.DistributionType.UNIFORM:       // Uniform random number [0,1]
+                    case DistributionType.UNIFORM:       // Uniform random number [0,1]
                         number = random.NextDouble();
                         break;
                     default:
                         throw new InvalidOperationException("Matrix.RandomVector() : The specified distribution is not supported in the function");
-                        //i = nrow;
-                        //Console.WriteLine();
-                        //valid = false;
-                        //break;
                 }
-                //                if (valid)
                 matrix.SetValueAt(i, 0, number);
             }
-            //          if (valid)
             return matrix;
-            //else
-            //    return null;
-            //}
-            //catch (Exception)
-            //{
-            //    Console.WriteLine("Matrix.RandomVector() : Error while computing the random vector");
-            //    return null;
-            //}
         }
 
-        /**
-         * This method returns the number of combinations.
-         * @param n the number of units
-         * @param d the number of units drawn in each combination
-         * @return a long
-         */
+        /// <summary>
+        /// Provide the number of combinations
+        /// </summary>
+        /// <param name="n">the number of units</param>
+        /// <param name="d">the number of units drawn in each combination</param>
+        /// <returns>a long</returns>
+        /// <exception cref="ArgumentException"></exception>
         public static long GetCombinations(int n, int d)
         {
             if (n < 1 || d < 1)
@@ -362,9 +282,6 @@ namespace REpiceaLight.stats
                     MathUtility.FactorialRatio(n, d) / MathUtility.Factorial(n - d);
             return (long)r; // TODO check if this cast works
         }
-
-
-
 
 
     }

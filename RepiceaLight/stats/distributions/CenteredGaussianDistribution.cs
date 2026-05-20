@@ -1,12 +1,26 @@
-﻿using REpiceaLight.math;
+﻿/*
+ * This file is part of the REpiceaLight library.
+ *
+ * Copyright (C) 2026 His Majesty the King in right of Canada
+ * Author: Mathieu Fortin, Canadian Forest Service
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 3 of the License, or (at your option) any later version.
+ *
+ * This library is distributed with the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * License for more details.
+ *
+ * Please see the license at http://www.gnu.org/copyleft/lesser.html.
+ */
+using REpiceaLight.math;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static REpiceaLight.stats.IDistribution;
 using static REpiceaLight.stats.StatisticalUtility;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace REpiceaLight.stats.distributions
 {
@@ -24,12 +38,13 @@ namespace REpiceaLight.stats.distributions
         private readonly Dictionary<int, SymmetricMatrix> simpleVarianceCovarianceMap;
         private readonly Dictionary<int, Matrix> simpleLowerCholeskyMap;
 
-        /**
-         * General constructor.
-         * @param variance the homogeneous variance
-         * @param correlationParameter the correlation parameter in the correlation structure
-         * @param type a TypeMatrixR enum
-         */
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        /// <param name="variance">the homogeneous variance</param>
+        /// <param name="correlationParameter">the correlation parameter in the correlation structure</param>
+        /// <param name="matrixType">a TypeMatrixR enum</param>
+        /// <exception cref="ArgumentException"></exception>
         public CenteredGaussianDistribution(SymmetricMatrix variance, double correlationParameter, TypeMatrixR? matrixType)
         {
             underlyingDistribution = new GaussianDistribution(new Matrix(variance.m_iRows, 1), variance);
@@ -38,20 +53,17 @@ namespace REpiceaLight.stats.distributions
             isStructured = this.correlationParameter != 0 && this.matrixType != null;
             if (isStructured && variance.m_iRows > 1)
                 throw new ArgumentException("The CenteredGaussianDistribution is not designed for a multivariate distribution with heterogeneous variances yet.");
-            structuredVarianceCovarianceMap = new();
-            structuredLowerCholeskyMap = new();
-            simpleVarianceCovarianceMap = new();
-            simpleLowerCholeskyMap = new();
+            structuredVarianceCovarianceMap = new Dictionary<List<int>, SymmetricMatrix>();
+            structuredLowerCholeskyMap = new Dictionary<List<int>, Matrix>();
+            simpleVarianceCovarianceMap = new Dictionary<int, SymmetricMatrix>();
+            simpleLowerCholeskyMap = new Dictionary<int, Matrix>();
         }
 
-        /**
-         * Constructor for univariate distribution.
-         * @param variance the homogeneous variance
-         */
-          public CenteredGaussianDistribution(SymmetricMatrix variance) : this(variance, 0d, null)
-          {
-
-         }
+        /// <summary>
+        /// Constructor without correlation structure.
+        /// </summary>
+        /// <param name="variance">the homogeneous variance</param>
+        public CenteredGaussianDistribution(SymmetricMatrix variance) : this(variance, 0d, null) {}
 
         private Matrix GetLowerCholesky(List<int> indexList)
         {
@@ -75,13 +87,13 @@ namespace REpiceaLight.stats.distributions
         {
             if (key is List<int>)
             {
-                List<int> referenceList = new();
+                List<int> referenceList = new List<int>();
                 referenceList.AddRange((List<int>)key);      // make a copy to avoid changes through reference
-                Matrix distances = new(referenceList);
+                Matrix distances = new Matrix(referenceList);
                 if (!matrixType.HasValue)
                     throw new InvalidOperationException("The R Matrix has not been set!");
                 SymmetricMatrix correlationMatrix = StatisticalUtility.ConstructRMatrix(new List<double> { 1d, correlationParameter }, matrixType.Value, distances);
-                SymmetricMatrix varianceCovariance = correlationMatrix.ScalarMultiply(underlyingDistribution.GetVariance().GetValueAt(0, 0));
+                SymmetricMatrix varianceCovariance = (SymmetricMatrix) correlationMatrix.ScalarMultiply(underlyingDistribution.GetVariance().GetValueAt(0, 0));
                 structuredVarianceCovarianceMap[referenceList] = varianceCovariance;
                 Matrix lowerChol = varianceCovariance.GetLowerCholTriangle();
                 structuredLowerCholeskyMap[referenceList] = lowerChol;
@@ -89,7 +101,7 @@ namespace REpiceaLight.stats.distributions
             else
             {
                 int size = (int)key;
-                DiagonalMatrix varianceCovariance = Matrix.GetIdentityMatrix(size).ScalarMultiply(underlyingDistribution.GetVariance().GetValueAt(0, 0));
+                DiagonalMatrix varianceCovariance = (DiagonalMatrix) Matrix.GetIdentityMatrix(size).ScalarMultiply(underlyingDistribution.GetVariance().GetValueAt(0, 0));
                 simpleVarianceCovarianceMap[size] = varianceCovariance;
                 Matrix lowerChol = varianceCovariance.GetLowerCholTriangle();
                 simpleLowerCholeskyMap[size] = lowerChol;
@@ -120,11 +132,12 @@ namespace REpiceaLight.stats.distributions
             return underlyingDistribution.GetMean();
         }
 
-        /**
-         * This method should be used in preference to the getMean() method.
-         * @param errorTermList a GaussianErrorTermList instance
-         * @return a Matrix instance
-         */
+        /// <summary>
+        /// Should be used instead of getMean for structured variance.
+        /// </summary>
+        /// <param name="errorTermList">a GaussianErrorTermList instance</param>
+        /// <returns>a Matrix instance</returns>
+        /// <exception cref="ArgumentException"></exception>
         public Matrix GetMean(GaussianErrorTermList errorTermList)
         {
             if (errorTermList == null || errorTermList.Count == 0)
@@ -133,17 +146,15 @@ namespace REpiceaLight.stats.distributions
             return chol.Multiply(errorTermList.GetNormalizedErrors());
         }
 
-        public SymmetricMatrix GetVariance()
-        {
-            return underlyingDistribution.GetVariance();
-        }
+        public SymmetricMatrix GetVariance() { return underlyingDistribution.GetVariance(); }
 
-        /**
-         * Provide the variance of the distribution given some error terms.<p>
-         * The class adapts the variance matrix as the number of error terms increases.
-         * @param errorTermList a GaussianErrorTermList instance
-         * @return a SymmetricMatrix instance
-         */
+        /// <summary>
+        /// Provide the variance of the distribution given some error terms. The class adapts 
+        /// the variance matrix as the number of error terms increases.
+        /// </summary>
+        /// <param name="errorTermList">a GaussianErrorTermList instance</param>
+        /// <returns>SymmetricMatrix</returns>
+        /// <exception cref="ArgumentException"></exception>
         public SymmetricMatrix GetVariance(GaussianErrorTermList errorTermList)
         {
             if (errorTermList == null || errorTermList.Count == 0)
@@ -152,10 +163,7 @@ namespace REpiceaLight.stats.distributions
             return GetVariance(errorTermList.GetDistanceIndex());
         }
 
-        public Matrix GetRandomRealization()
-        {
-            return underlyingDistribution.GetRandomRealization();
-        }
+        public Matrix GetRandomRealization() { return underlyingDistribution.GetRandomRealization(); }
 
         public Matrix GetRandomRealization(GaussianErrorTermList errorTermList)
         {
@@ -187,18 +195,7 @@ namespace REpiceaLight.stats.distributions
 
         public bool IsStructured() { return isStructured; }
 
-        //	public static void main(String[] args) {
-        //		List<Integer> list1 = new ArrayList<Integer>();
-        //		list1.add(1);
-        //		list1.add(2);
-        //		List<Integer> list2 = new ArrayList<Integer>();
-        //		list2.add(2);
-        //		list2.add(1);
-        //		System.out.println("Lists are equal : " + list1.equals(list2));
-        //		Collections.sort(list2);
-        //		System.out.println("Lists are equal : " + list1.equals(list2));
-        //	
-        //	}
+        public bool IsUnivariate() { return !IsMultivariate(); }
 
     }
 

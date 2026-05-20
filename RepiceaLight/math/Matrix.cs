@@ -18,15 +18,8 @@
  * Please see the license at http://www.gnu.org/copyleft/lesser.html.
  */
 using System;
-using System.ComponentModel;
-using System.Data.Common;
-using System.Net.NetworkInformation;
-using System.Numerics;
-using System.Reflection;
-using System.Reflection.Metadata;
+using System.Collections.Generic;
 using System.Text;
-using System.Threading.Channels;
-using System.Xml.Linq;
 
 namespace REpiceaLight.math
 {
@@ -409,7 +402,7 @@ namespace REpiceaLight.math
                     columnIndex.Add(j);
             }
 
-            Matrix outputMatrix = new(rowIndex.Count, columnIndex.Count);
+            Matrix outputMatrix = new Matrix(rowIndex.Count, columnIndex.Count);
             for (int i = 0; i < rowIndex.Count; i++)
             {
                 for (int j = 0; j < columnIndex.Count; j++)
@@ -439,7 +432,7 @@ namespace REpiceaLight.math
                     columnIndex.Add(j);
             }
 
-            Matrix outputMatrix = new(rowIndex.Count, columnIndex.Count);
+            Matrix outputMatrix = new Matrix(rowIndex.Count, columnIndex.Count);
             for (int i = 0; i < rowIndex.Count; i++)
             {
                 for (int j = 0; j < columnIndex.Count; j++)
@@ -516,7 +509,7 @@ namespace REpiceaLight.math
         public override Matrix LogMatrix()
         {
             bool valid = true;       // default is valid
-            Matrix matrix = new(m_iRows, m_iCols);
+            Matrix matrix = new Matrix(m_iRows, m_iCols);
             for (int i = 0; i < matrix.m_iRows; i++)
             {
                 for (int j = 0; j < matrix.m_iCols; j++)
@@ -565,7 +558,7 @@ namespace REpiceaLight.math
             else
             {
                 int dim = IsColumnVector() ? m_iRows : m_iCols;
-                DiagonalMatrix matrix = new(dim);
+                DiagonalMatrix matrix = new DiagonalMatrix(dim);
                 for (int i = 0; i < dim; i++)
                 {
                     if (IsColumnVector())
@@ -650,7 +643,7 @@ namespace REpiceaLight.math
 
         public override Matrix ScalarAdd(double d)
         {
-            Matrix mat = new(m_iRows, m_iCols);
+            Matrix mat = new Matrix(m_iRows, m_iCols);
             for (int i = 0; i < m_iRows; i++)
                 for (int j = 0; j < m_iCols; j++)
                     mat.SetValueAt(i, j, GetValueAt(i, j) + d);
@@ -659,7 +652,7 @@ namespace REpiceaLight.math
 
         public override Matrix ScalarMultiply(double d)
         {
-            Matrix mat = new(m_iRows, m_iCols);
+            Matrix mat = new Matrix(m_iRows, m_iCols);
             for (int i = 0; i < m_iRows; i++)
                 for (int j = 0; j < m_iCols; j++)
                     mat.SetValueAt(i, j, GetValueAt(i, j) * d);
@@ -698,7 +691,7 @@ namespace REpiceaLight.math
                     throw new InvalidOperationException("The number of elements contained in the imput column vector is not appropriate to transform the matrix into a square symmetric matrix!");
                 else
                 {
-                    SymmetricMatrix matrix = new(nbRow);
+                    SymmetricMatrix matrix = new SymmetricMatrix(nbRow);
                     int pointer = 0;
                     for (int i = 0; i < nbRow; i++)
                     {
@@ -716,7 +709,7 @@ namespace REpiceaLight.math
         {
             if (!IsTheSameDimension(m))
                 throw new InvalidOperationException("This instance and the Matrix m are not of the same dimension!");
-            Matrix mat = new(m_iRows, m_iCols);
+            Matrix mat = new Matrix(m_iRows, m_iCols);
             for (int i = 0; i < m_iRows; i++)
                 for (int j = 0; j < m_iCols; j++)
                     mat.SetValueAt(i, j, GetValueAt(i, j) - m.GetValueAt(i, j));
@@ -739,7 +732,7 @@ namespace REpiceaLight.math
 
         public override Matrix Transpose()
         {
-            Matrix matrix = new(m_iCols, m_iRows);
+            Matrix matrix = new Matrix(m_iCols, m_iRows);
             for (int i = 0; i < m_iRows; i++)
                 for (int j = 0; j < m_iCols; j++)
                     matrix.SetValueAt(j, i, GetValueAt(i, j));
@@ -755,7 +748,7 @@ namespace REpiceaLight.math
         /// <returns>a Matrix instance</returns>
         public virtual Matrix PowMatrix(double seed)
         {
-            Matrix matrix = new(m_iRows, m_iCols);
+            Matrix matrix = new Matrix(m_iRows, m_iCols);
             for (int i = 0; i < matrix.m_iRows; i++)
                 for (int j = 0; j < matrix.m_iCols; j++)
                     matrix.SetValueAt(i, j, Math.Pow(seed, GetValueAt(i, j)));
@@ -764,7 +757,7 @@ namespace REpiceaLight.math
 
         public override Matrix ElementWisePower(double power)
         {
-            Matrix matrix = new(m_iRows, m_iCols);
+            Matrix matrix = new Matrix(m_iRows, m_iCols);
             for (int i = 0; i < matrix.m_iRows; i++)
                 for (int j = 0; j < matrix.m_iCols; j++)
                     matrix.SetValueAt(i, j, Math.Pow(GetValueAt(i, j), power));
@@ -779,7 +772,7 @@ namespace REpiceaLight.math
         /// <returns>the resulting matrix</returns>
         public Matrix Repeat(int nrow, int ncol)
         {
-            Matrix resultingMatrix = new(m_iRows * nrow, m_iCols * ncol);
+            Matrix resultingMatrix = new Matrix(m_iRows * nrow, m_iCols * ncol);
             for (int i = 0; i < nrow; i++)
                 for (int j = 0; j < ncol; j++)
                     resultingMatrix.SetSubMatrix(this, i * m_iRows, j * m_iCols);
@@ -793,7 +786,7 @@ namespace REpiceaLight.math
         /// <returns>a row vector</returns>
         public Matrix RemoveElements(List<int> indices)
         {
-            Matrix oMat = new(1, m_iRows * m_iCols - indices.Count);
+            Matrix oMat = new Matrix(1, m_iRows * m_iCols - indices.Count);
             int pointer = 0;
             for (int i = 0; i < m_iRows; i++)
                 for (int j = 0; j < m_iCols; j++)
@@ -812,7 +805,7 @@ namespace REpiceaLight.math
         /// <returns>a row vector</returns>
         public Matrix GetElements(List<int> indices)
         {
-            Matrix oMat = new(1, indices.Count);
+            Matrix oMat = new Matrix(1, indices.Count);
             int pointer = 0;
             for (int i = 0; i < m_iRows; i++)
                 for (int j = 0; j < m_iCols; j++)
@@ -871,7 +864,7 @@ namespace REpiceaLight.math
         /// <returns>a List of integers</returns>
         public List<int> GetLocationIndex(double d)
         {
-            List<int> list = new();
+            List<int> list = new List<int>();
             for (int i = 0; i < m_iRows; i++)
                 for (int j = 0; j < m_iCols; j++)
                     if (Math.Abs(GetValueAt(i, j) - d) < VERY_SMALL)
@@ -945,7 +938,7 @@ namespace REpiceaLight.math
         /// <returns>the resulting product (a Matrix instance)</returns>
         public virtual Matrix GetKroneckerProduct(Matrix m)
         {
-            Matrix result = new(m_iRows * m.m_iRows, m_iCols * m.m_iCols);
+            Matrix result = new Matrix(m_iRows * m.m_iRows, m_iCols * m.m_iCols);
             for (int i1 = 0; i1 < m_iRows; i1++)
                 for (int j1 = 0; j1 < m_iCols; j1++)
                     for (int i2 = 0; i2 < m.m_iRows; i2++)
@@ -985,9 +978,9 @@ namespace REpiceaLight.math
         }
 
 
-        public override Matrix Clone()
+        public override object Clone()
         {
-            Matrix oMat = new(m_iRows, m_iCols);
+            Matrix oMat = new Matrix(m_iRows, m_iCols);
             for (int i = 0; i < m_iRows; i++)
                 for (int j = 0; j < m_iCols; j++)
                     oMat.SetValueAt(i, j, GetValueAt(i, j));
@@ -1022,8 +1015,8 @@ namespace REpiceaLight.math
                 throw new InvalidOperationException("Matrix.getLUDecomposition(): The matrix is not square!");
             else
             {
-                Matrix l = new(m_iRows, m_iCols);
-                Matrix u = new(m_iRows, m_iCols);
+                Matrix l = new Matrix(m_iRows, m_iCols);
+                Matrix u = new Matrix(m_iRows, m_iCols);
                 for (int i = 0; i < m_iRows; i++)
                 {
                     l.SetValueAt(i, i, 1d);
@@ -1106,11 +1099,11 @@ namespace REpiceaLight.math
             if (!IsSquare())
                 throw new InvalidOperationException("The matrix is not square!");
 
-            List<int> remainingIndex = new();
+            List<int> remainingIndex = new List<int>();
             for (int i = 0; i < m_iCols; i++)
                 remainingIndex.Add(i);
 
-            List<List<int>> blocks = new();
+            List<List<int>> blocks = new List<List<int>>();
 
             if (!IsSymmetric())
             {
@@ -1123,7 +1116,7 @@ namespace REpiceaLight.math
                 while (remainingIndex.Count != 0)
                 {
                     int i = 0;
-                    potentialBlock = new();
+                    potentialBlock = new List<int>();
                     potentialBlock.Add(remainingIndex[i]);
                     while (i < potentialBlock.Count)
                     {
@@ -1170,7 +1163,7 @@ namespace REpiceaLight.math
                 throw new InvalidOperationException("The matrix only has one element!");
             else
             {
-                Matrix m = new(m_iRows - 1, m_iCols - 1);
+                Matrix m = new Matrix(m_iRows - 1, m_iCols - 1);
                 int index_i = 0;
                 for (int ii = 0; ii < m_iRows; ii++)
                 {       // iterate in the current matrix
@@ -1242,7 +1235,7 @@ namespace REpiceaLight.math
         /// <returns>a Matrix instance</returns>
         public Matrix GetAdjugateMatrix()
         {
-            Matrix adjugate = new (m_iRows, m_iCols);
+            Matrix adjugate = new Matrix(m_iRows, m_iCols);
             for (int i = 0; i < m_iRows; i++)
                 for (int j = 0; j < m_iCols; j++)
                     adjugate.SetValueAt(j, i, GetCofactor(i, j));       // i and j are inversed for adjugate to ensure the transposition
@@ -1253,14 +1246,14 @@ namespace REpiceaLight.math
         {
             if (m_iRows == 1)
             {
-                Matrix output = new(1, 1);
+                Matrix output = new Matrix(1, 1);
                 output.SetValueAt(0, 0, 1d / GetValueAt(0, 0));
                 return output;
             }
             else if (m_iRows > SizeBeforeSwitchingToLUDecompositionInDeterminantCalculation)
             {
                 int index = m_iCols / 2;
-                Matrix output = new (m_iRows, m_iCols);
+                Matrix output = new Matrix(m_iRows, m_iCols);
                 Matrix a = GetSubMatrix(0, index - 1, 0, index - 1);
                 Matrix b = GetSubMatrix(0, index - 1, index, m_iCols - 1);
                 Matrix c = GetSubMatrix(index, m_iRows - 1, 0, index - 1);
@@ -1337,7 +1330,7 @@ namespace REpiceaLight.math
                 return GetInternalInverseMatrix();
             else
             {
-                Matrix inverseMatrix = new(m_iRows, m_iCols);
+                Matrix inverseMatrix = new Matrix(m_iRows, m_iCols);
                 foreach (List<int> blockIndex in indices)
                 {
                     Matrix invSubMatrix = GetSubMatrix(blockIndex, blockIndex).GetInternalInverseMatrix();
@@ -1359,14 +1352,16 @@ namespace REpiceaLight.math
         {
             if (dim <= 0)
                 throw new ArgumentException("The dim argument must be larger than 0!");
-            DiagonalMatrix mat = new(dim);
+            DiagonalMatrix mat = new DiagonalMatrix(dim);
             for (int i = 0; i < dim; i++)
                 mat.SetValueAt(i, i, 1d);
             return mat;
         }
 
-        public override bool Equals(object? obj)
+        public override bool Equals(object obj)
         {
+            if (obj is null)
+                return false;
             if (base.Equals(obj))
                 return true;
             else if (obj is Matrix)

@@ -1,11 +1,27 @@
-﻿using REpiceaLight.math;
+﻿/*
+ * This file is part of the REpiceaLight library.
+ *
+ * Copyright (C) 2026 His Majesty the King in right of Canada
+ * Author: Mathieu Fortin, Canadian Forest Service
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 3 of the License, or (at your option) any later version.
+ *
+ * This library is distributed with the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * License for more details.
+ *
+ * Please see the license at http://www.gnu.org/copyleft/lesser.html.
+ */
+using REpiceaLight.math;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace REpiceaLight.stats.estimates
 {
@@ -15,18 +31,18 @@ namespace REpiceaLight.stats.estimates
 
         //	private static final long serialVersionUID = 20120825L;
 
-        protected IEstimate.EstimatorType estimatorType;
+        protected EstimatorType estimatorType;
 
         protected readonly List<string> rowIndex;
 
 
         protected AbstractEstimate(IDistribution distribution) : base(distribution)
         {
-            rowIndex = new();
+            rowIndex = new List<string>();
         }
 
 
-        public IEstimate.EstimatorType GetEstimatorType() { return estimatorType; }
+        public EstimatorType GetEstimatorType() { return estimatorType; }
 
         public void SetRowIndex(List<string> newRowIndex)
         {
@@ -43,12 +59,16 @@ namespace REpiceaLight.stats.estimates
 
         public List<string> GetRowIndex()
         {
-            List<string> rowIndexCopy = new();
+            List<string> rowIndexCopy = new List<string>();
             rowIndexCopy.AddRange(rowIndex);
             return rowIndexCopy;
         }
 
-        public Matrix GetRandomDeviate()
+        /// <summary>
+        /// Provide a random deviate of the estimate.
+        /// </summary>
+        /// <returns>a Matrix instance</returns>
+        public virtual Matrix GetRandomDeviate()
         {
             return GetDistribution().GetRandomRealization();
         }
@@ -73,23 +93,21 @@ namespace REpiceaLight.stats.estimates
         public virtual IEstimate GetProductEstimate(double scalar)
         {
             Matrix diff = GetMean().ScalarMultiply(scalar);
-            SymmetricMatrix variance = GetVariance().ScalarMultiply(scalar * scalar);
+            SymmetricMatrix variance = (SymmetricMatrix) GetVariance().ScalarMultiply(scalar * scalar);
             return new SimpleEstimate(diff, variance);
         }
 
         public abstract ConfidenceInterval GetConfidenceIntervalBounds(double oneMinusAlpha);
 
-        /**
-         * This method checks if the two point estimates are compatible. The basic
-         * check consists of comparing the classes. Then, the matrix data is checked
-         * for consistency with previous data.
-         * @param estimate an Estimate instance
-         * @return a boolean
-         */
-        protected virtual bool IsMergeableEstimate(IEstimate estimate)
-        {
-            return false;
-        }
+
+        /// <summary>
+        /// Check if the two point estimates are compatible. The basic
+        /// check consists of comparing the classes.Then, the matrix data 
+        /// is checked for consistency with previous data.
+        /// </summary>
+        /// <param name="estimate">an Estimate instance</param>
+        /// <returns>a boolean</returns>        
+        protected virtual bool IsMergeableEstimate(IEstimate estimate) { return false; }
 
 
         public virtual IEstimate GetProductEstimate(IEstimate estimate)
@@ -109,29 +127,8 @@ namespace REpiceaLight.stats.estimates
             throw new InvalidOperationException("The getProductEstimate is only implemented for parametric univariate distribution ");
         }
 
-        //  /**
-        //* A static method to compute the product of many estimates.
-        //* @param estimates a list of Estimate instances
-        //* @return a SimpleEstimate instance
-        //*/
-        //  public static SimpleEstimate getProductOfManyEstimates(List<Estimate<Matrix, SymmetricMatrix, ?>> estimates)
-        //  {
-        //      Estimate < Matrix, SymmetricMatrix, ?> currentEstimate = null;
-        //      for (int i = 1; i < estimates.size(); i++)
-        //      {
-        //          if (i == 1)
-        //          {
-        //              currentEstimate = estimates.get(i - 1);
-        //          }
-        //          currentEstimate = currentEstimate.getProductEstimate(estimates.get(i));
-        //      }
-        //      return (SimpleEstimate)currentEstimate;
-        //  }
-
-        public IEstimate CollapseEstimate(OrderedDictionary desiredIndicesForCollapsing)
-        {
-            return CollapseMeanAndVariance(desiredIndicesForCollapsing);
-        }
+ 
+        public IEstimate CollapseEstimate(OrderedDictionary desiredIndicesForCollapsing) { return CollapseMeanAndVariance(desiredIndicesForCollapsing); }
 
         SimpleEstimate CollapseMeanAndVariance(OrderedDictionary desiredIndicesForCollapsing) {
             Matrix mean = GetMean();
@@ -139,10 +136,10 @@ namespace REpiceaLight.stats.estimates
                 throw new InvalidOperationException("The row indices have not been set yet!");
             if (rowIndex.Count != mean.m_iRows)
                 throw new ArgumentException("The size of the list is incompatible with the dimension of the estimate!");
-            List<string> copyOfIndex = new();
+            List<string> copyOfIndex = new List<string>();
             copyOfIndex.AddRange(GetRowIndex());
             copyOfIndex.Sort();
-            List<string> completeList = new();
+            List<string> completeList = new List<string>();
             foreach (List<string> l in desiredIndicesForCollapsing.Values)
                 completeList.AddRange(l);
             completeList.Sort();
@@ -165,7 +162,7 @@ namespace REpiceaLight.stats.estimates
 
         private static List<string> GetKeysFromOrderedDict(OrderedDictionary dict)
         {
-            List<string> outputList = new();
+            List<string> outputList = new List<string>();
             foreach (object k in dict.Keys)
             {
                 outputList.Add((string) k);
@@ -177,7 +174,7 @@ namespace REpiceaLight.stats.estimates
         {
             List<string> newIndexRow = GetKeysFromOrderedDict(desiredIndicesForCollapsing);
             newIndexRow.Sort();
-            Matrix collapsedMatrix = new(desiredIndicesForCollapsing.Count, 1);
+            Matrix collapsedMatrix = new Matrix(desiredIndicesForCollapsing.Count, 1);
             for (int i = 0; i < collapsedMatrix.m_iRows; i++)
             {
                 List<string> requestedIndices = (List<string>) desiredIndicesForCollapsing[newIndexRow[i]];
@@ -193,7 +190,7 @@ namespace REpiceaLight.stats.estimates
 
             List<string> newIndexRow = GetKeysFromOrderedDict(desiredIndicesForCollapsing);
             newIndexRow.Sort();
-            Matrix collapsedMatrix = new(desiredIndicesForCollapsing.Count, desiredIndicesForCollapsing.Count);
+            Matrix collapsedMatrix = new Matrix(desiredIndicesForCollapsing.Count, desiredIndicesForCollapsing.Count);
             for (int i = 0; i < collapsedMatrix.m_iRows; i++)
             {
                 List<string> requestedIndices_i = (List<string>)desiredIndicesForCollapsing[newIndexRow[i]];
@@ -211,7 +208,7 @@ namespace REpiceaLight.stats.estimates
 
         private List<int> ConvertIndexIntoInteger(List<string> selectedIndices)
         {
-            List<int> outputList = new();
+            List<int> outputList = new List<int>();
             foreach (string s in selectedIndices)
                 outputList.Add(GetRowIndex().IndexOf(s));
             return outputList;

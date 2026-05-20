@@ -1,11 +1,24 @@
-﻿using REpiceaLight.math;
+﻿/*
+ * This file is part of the REpiceaLight library.
+ *
+ * Copyright (C) 2026 His Majesty the King in right of Canada
+ * Author: Mathieu Fortin, Canadian Forest Service
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 3 of the License, or (at your option) any later version.
+ *
+ * This library is distributed with the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * License for more details.
+ *
+ * Please see the license at http://www.gnu.org/copyleft/lesser.html.
+ */
+using REpiceaLight.math;
 using REpiceaLight.stats.distributions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.Serialization;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace REpiceaLight.stats.estimates
 {
@@ -13,25 +26,25 @@ namespace REpiceaLight.stats.estimates
     {
 
 
-        /**
-         * Public constructor 1 for derived classes.
-         */
+        /// <summary>
+        /// Public constructor 1 for derived classes.
+        /// </summary>
         public SimpleEstimate() : base(new UnknownDistribution())
         {
-            estimatorType = IEstimate.EstimatorType.Unknown;
+            estimatorType = EstimatorType.Unknown;
         }
 
 
-        public override UnknownDistribution GetDistribution()
+        public override IDistribution GetDistribution()
         {
-            return (UnknownDistribution) base.GetDistribution();
+            return base.GetDistribution();
         }
 
-        /**
-         * Public constructor 2 with mean and variance
-         * @param mean a Matrix instance
-         * @param variance a Matrix instance
-         */
+        /// <summary>
+        /// Public constructor 2 with mean and variance.
+        /// </summary>
+        /// <param name="mean">a Matrix instance</param>
+        /// <param name="variance">a Matrix instance</param>
         public SimpleEstimate(Matrix mean, SymmetricMatrix variance) : this()
         {
             SetMean(mean);
@@ -40,12 +53,12 @@ namespace REpiceaLight.stats.estimates
 
         public void SetMean(Matrix mean)
         {
-            GetDistribution().SetMean(mean);
+            ((UnknownDistribution) GetDistribution()).SetMean(mean);
         }
 
         public void SetVariance(SymmetricMatrix variance)
         {
-            GetDistribution().SetVariance(variance);
+            ((UnknownDistribution) GetDistribution()).SetVariance(variance);
         }
 
 

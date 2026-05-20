@@ -1,9 +1,26 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <RepositoryUrl>https://github.com/CWFC-CCFB/REpiceaLight</RepositoryUrl>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageProjectUrl>https://github.com/CWFC-CCFB/REpiceaLight</PackageProjectUrl>
+    <Copyright>His Majesty the King of right of Canada 2026</Copyright>
+    <Description>A light implementation of the repicea suite in .NET.</Description>
+    <Authors></Authors>
+    <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
+    <Title>REpiceaLight</Title>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\LICENSE.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+    <None Include="..\README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
 
 </Project>
